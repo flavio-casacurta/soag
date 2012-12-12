@@ -1,0 +1,13 @@
+{{left_sidebar_enabled  = True}}
+{{right_sidebar_enabled = False}}
+
+{{extend 'layout.html'}}
+
+{{if 'message' in globals():}}
+     {{if  message <> ' ':}}
+         <h3>{{=message}}</h3>
+         <hr />
+     {{pass}}
+{{else:}}
+     {{=BEAUTIFY(response._vars)}}
+{{pass}}

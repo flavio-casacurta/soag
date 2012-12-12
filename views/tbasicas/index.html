@@ -1,0 +1,27 @@
+{{left_sidebar_enabled  = True}}
+{{right_sidebar_enabled = False}}
+
+{{extend  "layout.html"}}
+
+<br />
+<h4>{{=BEAUTIFY('Aplica a carga nas tabelas basicas do Sistema.')}}</h4>
+{{if mensagens:}}
+    <hr />
+    <h5>Resultado:</h5>
+    <ul>
+        {{for mensagem in mensagens:}}
+            <li>{{=mensagem}}</li>
+        {{pass}}
+    </ul>
+{{pass}}
+<hr />
+<table>
+    <tr>
+        <td width=999 align="left">
+            {{=A(T('Clear'),_class='button',_href=URL('clear'))}}
+        </td>
+        <td width=999 align="right">
+            {{=A(T('Aplicar'),_class='button',_href=URL('aplicar'))}}
+        </td>
+    </tr>
+</table>

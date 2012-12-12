@@ -1,0 +1,23 @@
+{{left_sidebar_enabled  = True}}
+{{right_sidebar_enabled = False}}
+
+{{extend  "layout.html"}}
+
+<form>
+    <br />
+    {{tit = ''}}
+    {{ for x in title:}}
+        {{tit += x}}
+    {{pass}}
+    <h4>{{=XML(tit)}}</h4>
+    {{if mensagens:}}
+        <hr />
+        <h5>Resultado:</h5>
+        <ul>
+            {{for mensagem in mensagens:}}
+                <li>{{=mensagem}}</li>
+            {{pass}}
+        </ul>
+    {{pass}}
+    <hr />
+</form>

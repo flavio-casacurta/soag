@@ -1,0 +1,36 @@
+//*
+//@STEP    EXEC SORTD
+//*
+//* ***    *************************************************************
+//* ***    CLASSIFICA A IMAGEM DA TABELA @TABLENAME POR:
+//* ***    @CLASSIFICACAO
+//* ***    *************************************************************
+//*
+//SORTIN   DD DSN=AD.C87.@ROTINA.SYSREC01.@TABLENAME,
+//       DISP=SHR
+//*
+//SORTOUT  DD DSN=AD.C87.@ROTINA.SORT.@TABLENAME.@ARQNAME,
+//       DISP=(,CATLG,DELETE),
+//       UNIT=(DISCO,04),
+//       SPACE=(TRK,(005000,1000),RLSE),
+//       DCB=(AD.A,LRECL=@LRECL,RECFM=FB)
+//*
+//SYSIN    DD *
+ SORT FIELDS=(@FIELDS@INCLUDE
+ END
+//*
+//SORTLIB  DD DSN=SYS1.SORTLIB,
+//       DISP=SHR
+//SORTWK01 DD UNIT=(DISCO,59),
+//       SPACE=(CYL,(0800))
+//SORTWK02 DD UNIT=(DISCO,59),
+//       SPACE=(CYL,(0800))
+//SORTWK03 DD UNIT=(DISCO,59),
+//       SPACE=(CYL,(0800))
+//SORTWK04 DD UNIT=(DISCO,59),
+//       SPACE=(CYL,(0800))
+//SORTWK05 DD UNIT=(DISCO,59),
+//       SPACE=(CYL,(0800))
+//*
+//SYSOUT   DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=Y

@@ -1,0 +1,38 @@
+{{left_sidebar_enabled  = True}}
+{{right_sidebar_enabled = False}}
+
+{{extend  "layout.html"}}
+
+<form>
+    <br />
+    {{tit = ''}}
+    {{ for x in title:}}
+        {{tit += x}}
+    {{pass}}
+    <h4>{{=XML(tit)}}</h4>
+    {{if mensagens:}}
+        <hr />
+        <h5>Resultado:</h5>
+        <table>
+            <tr>
+                <td><h5>Programa</h5></td>
+                <td>-</td>
+                <td><h5>{{=u'Função'}}</h5></td>
+                <td>-</td>
+                <td><h5>Entidade</h5></td>
+                <td>-</td>
+                <td><h5>{{=u'Descrição'}}</h5></td>
+            </tr>
+            {{for mensagem in mensagens:}}
+                <tr>
+                    {{msg=mensagem.split('-')}}
+                    {{for i in range(0,4):}}
+                        {{=XML('<td>-</td>') if i > 0 else ''}}<td>{{=msg[i]}}</td>
+
+                    {{pass}}
+                </tr>
+            {{pass}}
+        </table>
+    {{pass}}
+    <hr />
+</form>

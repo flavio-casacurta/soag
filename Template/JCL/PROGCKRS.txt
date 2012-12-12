@@ -1,0 +1,20 @@
+//@JOBNAME JOB '@APPLID,4220,PR14','@USER',MSGCLASS=Z
+//JOBLIB   DD DSN=AV.BIBGERTT,DISP=SHR
+//         DD DSN=AV.CHGM.LOADLIB.BSL.LOB,DISP=SHR
+//         DD DSN=AV.BIBGERAL,DISP=SHR
+//         DD DSN=SYS1.CEE.SCEERUN,DISP=SHR
+//         DD DSN=DB2A2.R2.DSNLOAD,DISP=SHR
+//*
+//@STEP    EXEC @PROGRAMA
+//*
+//* ***    *************************************************************
+//* ***    @COMENTARIO
+//* ***    *************************************************************
+//*
+@ENTRADA
+//*
+@SAIDA
+//*
+//SYSOUT   DD SYSOUT=*
+//SYSUDUMP DD SYSOUT=Y
+//*

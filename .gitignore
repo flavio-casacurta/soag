@@ -1,0 +1,25 @@
+# files
+
+*.pyc
+*.pyo
+progress.log
+routes.example.py
+.dropbox
+about
+license
+__init__.py
+todo.txt
+
+# folders
+
+/cron
+/models
+/uploads
+/databases
+/sessions
+/cache
+/errors
+/private
+/languages
+
+

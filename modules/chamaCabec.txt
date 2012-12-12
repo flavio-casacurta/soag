@@ -1,0 +1,11 @@
+from cabecalhoPGM import cabecalhoPGM
+cab = cabecalhoPGM(db
+                  , cAppl=1
+                  , entidadeId=1
+                  , objetivo='Coordenador'
+                  , pgmid='ddi'
+                  , servico='inclusao'
+                  , tppgm=1
+                  , userName='flavio Casacurta'
+                  )
+txt = cab.montaCabecalho()

@@ -1,0 +1,17 @@
+      ******************************************************************
+      * NOME BOOK  : @BOOKNAME *
+      * FUNCAO     : IMAGEM DA TABELA @TABLENAME *
+      *              EM ARQUIVO SEQUENCIAL PARA UTILIZ. NOS PROCESSOS  *
+      *              BATCH                                             *
+      * DATA       : @MES / @ANO *
+      * EMPRESA    : @EMPRESA *
+      * AUTOR      : @AUTHOR *
+      * SISTEMA    : @SISTEMA *
+      * TAMANHO    : @LENGTH BYTES                                        *
+      ******************************************************************
+      * DATA       AUTOR             DESCRICAO / MANUTENCAO            *
+      ******************************************************************
+      @CAMPO_DESCRICAO
+      ******************************************************************
+           05 @BOOKSNAME-REGISTRO.
+              @IMAGEMS
