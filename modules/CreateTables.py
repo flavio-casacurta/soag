@@ -12,6 +12,13 @@ from Mensagens                     import Mensagens
 from PrimaryKeys                   import PrimaryKeys
 from ForeignKeys                   import ForeignKeys
 
+dicDataTypes={'CHAR':''
+             ,'DATE':'date'
+             ,'DECIMAL':'integer'
+             ,'INTEGER':''integer''
+             ,'TIMESTAMP':'datetime'
+             ,'VARCHAR':'text'}
+
 class CreateTables:
 
     def __init__(self, db, sessionId=None, cAppl=None, userName=None):
