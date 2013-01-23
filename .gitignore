@@ -10,6 +10,7 @@ license
 __init__.py
 todo.txt
 soag.accdb
+settings_local.db
 
 # folders
 

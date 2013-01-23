@@ -116,8 +116,9 @@ def words(args):
 def word(texto, idx):
     return words(texto)[idx]
 
-def txtAbrev(txt, lgt):
-    txt=remover_acentos(txt)
+def txtAbrev(txt, lgt, removerAcentos=1):
+    if  removerAcentos:
+        txt=remover_acentos(txt)
     for w in words(txt):
         if len(txt) <= lgt:
             break

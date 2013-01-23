@@ -71,8 +71,13 @@ class Colunas:
             nAttr = nAttr + attr[strt:chr+1]
             dicCols[k]['attributename'] = nAttr
 
-#  Trata descrição
+#  Trata label
+            wrd = 0
+            if  len(nAttr.split()) > 0:
+                wrd = 1
+            dicCols[k]['label'] = ' '.join(nAttr.split()[wrd:])
 
+#  Trata descrição
             if  dicCols[k]['descricao']:
                 try:
                     dicCols[k]['descricao'] = ' '.join(dicCols[k]['descricao'].split())
@@ -93,6 +98,7 @@ class Colunas:
                                    ,tamanhoColuna   = dicCols[k]['Physical_Data_Type'][1]
                                    ,decimais        = dicCols[k]['Physical_Data_Type'][2]
                                    ,attributeName   = dicCols[k]['attributename']
+                                   ,label           = dicCols[k]['label']
                                    ,descricao       = dicCols[k]['descricao']
                                    )
                 gravados += 1
