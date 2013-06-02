@@ -18,6 +18,7 @@ class Aplicacao:
            self.contratante         = self.query[0].contratante
            self.grupo               = self.query[0].grupo
            self.analista            = self.query[0].analista
+           self.ownerDb2            = self.query[0].ownerDb2
            self.soag                = self.query[0].soag
            self.glog                = self.query[0].glog
            self.delecaoLogica       = self.query[0].delecaoLogica
@@ -29,6 +30,7 @@ class Aplicacao:
            self.contratante         = ''
            self.grupo               = ''
            self.analista            = ''
+           self.ownerDb2            = ''
            self.soag                = 0
            self.glog                = 0
            self.delecaoLogica       = 0
@@ -50,6 +52,9 @@ class Aplicacao:
    def getAnalista(self):
        return self.analista
 
+   def getOwnerDb2(self):
+       return self.ownerDb2
+
    def getSoag(self):
        return self.soag
 
@@ -64,3 +69,5 @@ class Aplicacao:
 
    def getEmpresaId(self):
        return self.empresa
+
+# vim: ft=python

@@ -72,11 +72,27 @@ def index():
 
                     mensagensPadrao = MensagensPadrao(db, cAppl=idaplicacao)
                     mensagensPadrao.criaMensagensPadrao()
-                    db.checkList.insert(codigoAplicacao=idaplicacao,
-                        aplicacao=False, entidades=False, colunas=False,
-                            regrasColunas=False, origemColunas=False,
-                                colunasEntidades=False,
-                                    mensagensEntidades=False, programas=False)
+                    db.checkList.insert(codigoAplicacao    = idaplicacao
+                                       ,aplicacao          = False
+                                       ,entidades          = False
+                                       ,colunas            = False
+                                       ,regrasColunas      = False
+                                       ,origemColunas      = False
+                                       ,colunasEntidades   = False
+                                       ,mensagensEntidades = False
+                                       ,programas          = False)
+                    db.colunas.insert(codigoAplicacao = idaplicacao
+                                     ,columnName      = 'NREG_QTDE'
+                                     ,codigoDatatype  = 12
+                                     ,tamanhoColuna   = 2
+                                     ,decimais        = 0
+                                     ,attributeName   = 'QUANTIDADE DE REGISTROS'
+                                     ,label           = 'QUANTIDADE DE REGISTROS'
+                                     ,descricao       = 'QUANTIDADE DE REGISTROS DEVOLVIDOS')
+                    db.menu.insert(codigoAplicacao=idaplicacao
+                                  ,parent=''
+                                  ,descricao='Menu Principal'
+                                  ,url='')
                     response.flash = 'Aplicacao Incluída'
     if  session.flash:
         response.flash = session.flash

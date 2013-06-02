@@ -4,7 +4,7 @@
    @author: C&C - HardSoft
 '''
 
-import win32com.client as win32c, traceback, pdb
+import win32com.client as win32c, traceback
 
 class Erwin(object):
 
@@ -19,14 +19,22 @@ class Erwin(object):
         self.relationShips = {}
         self.erro          = {}
         
-        #pdb.set_trace()
+        machine = '127.0.0.1'
+        clsctx = win32c.pythoncom.CLSCTX_LOCAL_SERVER
+        userName = 'Flavio'
 
         try:
-            self.erwin = win32c.DispatchEx('Python.Erwin')
+            self.erwin = win32c.DispatchEx('Python.Erwin',
+                                           machine=machine,
+                                           userName=userName,
+                                           clsctx=clsctx)
         except:
             try:
                 win32c.pythoncom.CoInitialize()
-                self.erwin = win32c.DispatchEx('Python.Erwin')
+                self.erwin = win32c.DispatchEx('Python.Erwin',
+                                               machine=machine,
+                                               userName=userName,
+                                               clsctx=clsctx)
             except:
                 msgsErrors = {}
                 erros = traceback.format_exc()

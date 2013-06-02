@@ -6,6 +6,10 @@ INSERT INTO parametros(raiz, web2py, log, soag)
 INSERT INTO empresa(nome, descricao, ativo)
     VALUES ('empresa1', 'Primeira Empresa', 'T');
 
+-- insert menu
+INSERT INTO menu(codigoAplicacao, parent, descricao, url)
+    VALUES (0, 0, 'Menu Principal', 0);
+
 -- insert auth_group
 INSERT INTO auth_group(role, description)
     VALUES ('Administrador','Administrador');

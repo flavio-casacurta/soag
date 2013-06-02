@@ -90,13 +90,7 @@ class Gerpro:
        persistencia      = 'IUDSS'
        servico           = ('INCLUSAO', 'ALTERACAO', 'EXCLUSAO', 'CONSULTA', 'CONSULTALISTA')
        messageErro       = [0, 0, 0, 1, 1]
-       path = os.path.join( '\\\\'
-                          , '127.0.0.1'
-                          , 'c$'
-                          , self.parms.raiz
-                          , self.empresa
-                          , self.applId
-                          , 'DEFINICOES')
+       path = os.path.join( '\\\\', '127.0.0.1', 'c$', self.parms.raiz, self.empresa, self.applId)
        for i in xrange(5):
            if  not pgm[i]:
                continue
@@ -109,7 +103,7 @@ class Gerpro:
                bookSaida = 'S'
            else:
                bookSaida = ''
-           nomePrograma  = os.path.join(path, (self.applId + '1' + programa.nomePrograma + regra[i]))
+           nomePrograma  = os.path.join(path, 'DEFINICOES', (self.applId + '1' + programa.nomePrograma + regra[i]))
            properties    = nomePrograma + '.pro'
            pro           = open(properties, 'w')
            coordenador   = 'NAO'
@@ -156,22 +150,8 @@ class Gerpro:
                return [0, 'Ocorreu algum erro >>> ' + retGerarColunas[1] + ' <<< na geracao das colunas']
            self.submit.submit(properties)
 
-       cpy = os.path.join( '\\\\'
-                         , '127.0.0.1'
-                         , 'c$'
-                         , self.parms.raiz
-                         , self.empresa
-                         , self.applId
-                         , 'GERADOS'
-                         , 'CPY')
-       pgm = os.path.join( '\\\\'
-                         , '127.0.0.1'
-                         , 'c$'
-                         , self.parms.raiz
-                         , self.empresa
-                         , self.applId
-                         , 'GERADOS'
-                         , 'PGM')
+       cpy = os.path.join( path, 'GERADOS', 'CPY')
+       pgm = os.path.join( path, 'GERADOS', 'PGM')
        self.compact.compact(entidade.nomeExterno, [cpy, pgm])
        print 'Expecificacoes Geradas = ' + str(gerados)
        return [1, 'Expecificacoes Geradas = ' + str(gerados)]

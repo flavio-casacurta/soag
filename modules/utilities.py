@@ -9,11 +9,20 @@ from   gluon.html import XML, A, URL
 from   gluon      import current
 import re
 import unicodedata
-import os
-import platform
+import os, sys
+import string
 import traceback
 import base64
 import uuid
+import shutil
+from fileutils import up, w2p_unpack, read_file, write_file
+from HOFsGenericas import *
+import zipfile
+try:
+    import zlib
+    compression = zipfile.ZIP_DEFLATED
+except:
+    compression = zipfile.ZIP_STORED
 
 def web2py_uuid():
     return str(uuid.uuid4())
@@ -108,13 +117,9 @@ def safe_string(obj):
 
     return obj
 
-wordsRe = re.compile(r'\w+', re.UNICODE)
-
-def words(args):
-    return wordsRe.findall(args)
-
-def word(texto, idx):
-    return words(texto)[idx]
+def iterInv(data):
+    for index in range(len(data)-1, -1, -1):
+        yield data[index]
 
 def txtAbrev(txt, lgt, removerAcentos=1):
     if  removerAcentos:
@@ -123,9 +128,9 @@ def txtAbrev(txt, lgt, removerAcentos=1):
         if len(txt) <= lgt:
             break
         if w+' '  in txt:
-            txt=txt.replace(w+' ',w[0:3]+'.')
+            txt=txt.replace(w+' ',w[0:3]+'.',1)
         else:
-            txt=txt.replace(w,w[0:3]+'.')
+            txt=txt.replace(w,w[0:3]+'.',1)
     return txt[0:lgt]
 
 def insAster72(txt):
@@ -176,7 +181,7 @@ def Select(db, name=None, table=None, fields=[], prefix=None, \
     options = [[0, '-- Selecione --']]
 
     if  todos:
-        options.append([999999, all])
+        options.append([999999, todos])
 
     for row in rows:
         if  masks:
@@ -425,3 +430,646 @@ def CryptFileName(tabela, campo, arquivo):
                                     (tabela, campo, uuid_key, encoded_filename)
     newfilename      = newfilename[:(511 - len(extension))] + '.' + extension
     return newfilename
+
+def compact(fileIn, fileOut, arcname=None):
+    zip = zipfile.ZipFile(fileOut, mode='w')
+    zip.write(fileIn, arcname=arcname, compress_type=compression)
+    zip.close()
+
+def desCompact(fileIn, path=None):
+    zip = zipfile.ZipFile(fileIn)
+    member = zip.namelist()[0]
+    zip.extract(member, path)
+    zip.close()
+    return member
+
+def lreclCopy(copy):
+
+    if  isinstance(copy, list):
+        book = copy
+    else:
+        if  isinstance(copy, str):
+            book = copy.split('\n')
+        else:
+            book = []
+
+    regc = {}
+
+    linhas = filter(both(isNotRem, isNotBlank), book)
+
+    while True:
+
+        copy = False
+
+        for li in linhas:
+
+            if  li.find('COPY') > -1:
+
+                copy = True
+
+                break
+
+        if  not copy: break
+
+        idx = -1
+
+        for li in linhas:
+
+            idx += 1
+
+            if  li.find('COPY') > -1:
+
+                cols = li.split()
+
+                book = cols[1].replace("'", '').replace('.', '')
+
+                msg = 'COPY {} deve ser expandido.'.format(book)
+
+                return {'retorno': False, 'msg': msg, 'lrecl': 0}
+
+    linhaf = ''
+    redefines = ''
+    posdic = {}
+    idxFiller = 1
+    idx = 0
+    posicao = 1
+    itemGrupo = []
+    nivel = 0
+    occurs = 0
+    niveloccurs = 0
+    idl = 0
+
+    for li in linhas:
+
+        if  li.find('.') < 0:
+
+            linhaf += li.upper()
+
+            continue
+
+        linhaf += li.upper()
+
+        linha = linhaf.split()
+
+        idl += 1
+
+        nivel = int(linha[0])
+
+        campo = linha[1].replace('.', '')
+
+        if  campo == 'FILLER':
+
+            cpo = '%s_%s' % (campo, '{:>02}'.format(idxFiller))
+
+            idxFiller += 1
+
+        else:
+
+            cpo = campo
+
+        itemGrupo.append([nivel, cpo])
+
+        cpox = ''
+
+        for idx in xrange(idl - 1, 0, -1):
+
+            if  itemGrupo[idx][0] < nivel:
+
+                cpox = itemGrupo[idx][1]
+
+                break
+
+        if  linhaf.find('REDEFINES ') > -1 and linhaf.find('PIC ') < 0:
+
+            redefines = linha[3].replace('.', '')
+
+            posdic[cpo] = posicao = posdic[redefines]
+
+            regc[cpo] = {}
+
+            regc[cpo]['nivel': nivel]
+            regc[cpo]['natureza': '']
+            regc[cpo]['posicao': posdic[cpo]]
+            regc[cpo]['picture': '']
+            regc[cpo]['tamanho': 0]
+            regc[cpo]['inteiro': 0]
+            regc[cpo]['decimais': 0]
+            regc[cpo]['tipo': '']
+            regc[cpo]['bytes': 0]
+            regc[cpo]['redefines': redefines]
+            regc[cpo]['itemGrupo': cpox]
+            regc[cpo]['occurs': occurs]
+
+            linhaf = ''
+
+            continue
+
+        if  linhaf.find('REDEFINES ') > -1 and \
+            linhaf.find('PIC ') > -1:
+
+            picture = linha[5]
+            picts = picture.replace('.', '')
+
+            if  len(linha) > 6:
+
+                if  len(linha) == 7:
+
+                    picture += (' ' + linha[6])
+
+                else:
+
+                    for idx in xrange(6, len(linha) - 1):
+
+                        if  linha[idx].upper() != 'VALUE':
+
+                            picture += (' ' + linha[idx])
+
+            picture = picture.replace('S', '')
+
+            pict = ''
+            inteiro = 0
+            decimais = 0
+            tam = ''
+            dec = ''
+            idx = 0
+
+            while picture[idx:idx + 1] != '(' and \
+                  picture[idx:idx + 1] != ' ' and \
+                  picture[idx:idx + 1] != '.':
+
+                pict += picture[idx:idx + 1]
+                idx += 1
+
+            idx += 1
+
+            while picture[idx:idx + 1] == ' ':
+
+                idx += 1
+
+            while picture[idx:idx + 1] != ')' and \
+                  picture[idx:idx + 1] != ' ' and \
+                  picture[idx:idx + 1] != '.':
+                tam += picture[idx:idx + 1]
+                idx += 1
+
+            idx += 1
+
+            while picture[idx:idx + 1] == ' ':
+
+                idx += 1
+
+            if  picture[idx:idx + 1] == 'V':
+
+                dec = 'V'
+                idx += 1
+
+                while picture[idx:idx + 1] == '9' or \
+                      picture[idx:idx + 1] == '(' or \
+                      picture[idx:idx + 1] == ' ' or \
+                      picture[idx:idx + 1] == '.':
+
+                    idx += 1
+
+                if  picture[idx:idx + 1] != 'U' and \
+                    picture[idx:idx + 1] != '.':
+
+                    while picture[idx:idx + 1] != ')' and \
+                          picture[idx:idx + 1] != ' ' and \
+                          picture[idx:idx + 1] != '.':
+
+                        dec += picture[idx:idx + 1]
+                        idx += 1
+
+            if  dec == 'V':
+
+                dec = ''
+
+            if  dec != '' and (dec[1:] >= '0' and dec[1:] <= '9'):
+
+                inteiro = int(tam)
+                decimais = int(dec[1:])
+                tam = str(int(tam) + int(dec[1:]))
+
+            else:
+
+                inteiro = int(tam)
+                decimais = 0
+
+            tam += dec
+            tipo = ''
+            idxtipo = picture.find(' COMP')
+
+            if  idxtipo > -1:
+
+                idxtipo += 1
+
+                while picture[idxtipo:idxtipo + 1] != ' ' and \
+                      picture[idxtipo:idxtipo + 1] != '.':
+
+                    tipo += picture[idxtipo:idxtipo + 1]
+
+                    idxtipo += 1
+
+            redefines = linha[3].replace('.', '')
+
+            posdic[cpo] = posicao = posdic[redefines] + 1
+
+            regc[cpo] = {}
+
+            regc[cpo]['nivel'] = nivel
+            regc[cpo]['natureza'] = pict
+            regc[cpo]['posicao'] = posdic[cpo]
+            regc[cpo]['picture'] = picts
+            regc[cpo]['tamanho'] = tam
+            regc[cpo]['inteiro'] = inteiro
+            regc[cpo]['decimais'] = decimais if decimais else 0
+            regc[cpo]['tipo'] = tipo
+            regc[cpo]['bytes'] = 0
+            regc[cpo]['redefines'] = redefines
+            regc[cpo]['itemGrupo'] = cpox
+            regc[cpo]['occurs'] = occurs
+
+            linhaf = ''
+
+            continue
+
+        if  linhaf.find('OCCURS ') > -1:
+
+            if  len(linha) == 4:
+
+                occurs = int(linha[3].replace('.', ''))
+
+            elif len(linha) == 5:
+
+                occurs = int(linha[3].replace('.', ''))
+
+            else:
+
+                occurs = int(linha[5].replace('.', ''))
+
+            niveloccurs = nivel
+
+            posdic[cpo] = posicao
+
+            regc[cpo] = {}
+
+            regc[cpo]['nivel'] = nivel
+            regc[cpo]['natureza'] = ''
+            regc[cpo]['posicao'] = posdic[cpo]
+            regc[cpo]['picture'] = ''
+            regc[cpo]['tamanho'] = 0
+            regc[cpo]['inteiro'] = 0
+            regc[cpo]['decimais'] = 0
+            regc[cpo]['tipo'] = ''
+            regc[cpo]['bytes'] = 0
+            regc[cpo]['redefines'] = ''
+            regc[cpo]['itemGrupo'] = cpox
+            regc[cpo]['occurs'] = occurs
+
+            linhaf = ''
+
+            continue
+
+        if  linhaf.find('PIC ') < 0:
+
+            posdic[cpo] = posicao
+
+
+            regc[cpo] = {}
+
+            regc[cpo]['nivel'] = nivel
+            regc[cpo]['natureza'] = ''
+            regc[cpo]['posicao'] = posdic[cpo]
+            regc[cpo]['picture'] = ''
+            regc[cpo]['tamanho'] = 0
+            regc[cpo]['inteiro'] = 0
+            regc[cpo]['decimais'] = 0
+            regc[cpo]['tipo'] = ''
+            regc[cpo]['bytes'] = 0
+            regc[cpo]['redefines'] = ''
+            regc[cpo]['itemGrupo'] = cpox
+            regc[cpo]['occurs'] = occurs
+
+            linhaf = ''
+
+            continue
+
+        if  occurs:
+
+            if  nivel <= niveloccurs:
+
+                occurs = 0
+
+                niveloccurs = 0
+
+        redefines = ''
+
+        linhaf = ''
+
+        picture = linha[3]
+
+        picts = picture.replace('.', '')
+
+        if  len(linha) > 4:
+
+            if  len(linha) == 5:
+
+                picture += (' ' + linha[4])
+
+            else:
+
+                for idx in xrange(4, len(linha) - 1):
+
+                    if  linha[idx].upper() != 'VALUE':
+
+                        picture += (' ' + linha[idx])
+
+        picture = picture.replace('S', '')
+
+        pict = ''
+        inteiro = 0
+        decimais = 0
+        tam = ''
+        dec = ''
+        idx = 0
+
+        while picture[idx:idx + 1] != '(' and \
+              picture[idx:idx + 1] != ' ' and \
+              picture[idx:idx + 1] != '.':
+
+            pict += picture[idx:idx + 1]
+            idx += 1
+
+        idx += 1
+
+        while picture[idx:idx + 1] == ' ':
+
+            idx += 1
+
+        while picture[idx:idx + 1] != ')' and \
+              picture[idx:idx + 1] != ' ' and \
+              picture[idx:idx + 1] != '.':
+
+            tam += picture[idx:idx + 1]
+            idx += 1
+
+        idx += 1
+
+        while picture[idx:idx + 1] == ' ':
+
+            idx += 1
+
+        qt9 = 0
+
+        if  picture[idx:idx + 1] == 'V':
+
+            dec = 'V'
+            idx += 1
+            qt9 = 0
+
+            while picture[idx:idx + 1] == '9' or \
+                  picture[idx:idx + 1] == '(' or \
+                  picture[idx:idx + 1] == ' ' or \
+                  picture[idx:idx + 1] == '.':
+
+                if  picture[idx:idx + 1] == '9':
+
+                    qt9 += 1
+
+                idx += 1
+
+            if  picture[idx:idx + 1] != 'U' and \
+                picture[idx:idx + 1] != '.':
+
+                while picture[idx:idx + 1] != ')' and \
+                      picture[idx:idx + 1] != ' ' and \
+                      picture[idx:idx + 1] != '' and \
+                      picture[idx:idx + 1] != '.':
+
+                    dec += picture[idx:idx + 1]
+                    idx += 1
+
+        if  dec == 'V':
+
+            dec = ''
+
+        if  dec != '' and (dec[1:] >= '0' and dec[1:] <= '9'):
+
+            inteiro = int(tam)
+            decimais = int(dec[1:])
+
+            tam = str(int(tam) + int(dec[1:]))
+
+        else:
+
+            inteiro = int(tam)
+            decimais = qt9
+
+        tam += dec
+        tipo = ''
+        idxtipo = picture.find(' COMP')
+
+        if  idxtipo > -1:
+
+            idxtipo += 1
+
+            while picture[idxtipo:idxtipo + 1] != ' ' and \
+                  picture[idxtipo:idxtipo + 1] != '.':
+
+                tipo += picture[idxtipo:idxtipo + 1]
+                idxtipo += 1
+
+        if  redefines:
+
+            posdic[cpo] = posicao = posdic[redefines] + 1
+
+        else:
+
+            posdic[cpo] = posicao
+
+        nbytes = 0
+
+        if  not redefines:
+
+            if  pict == '9':
+
+                if  tipo.find('COMP-3') > -1:
+
+                    nbytes = (((inteiro + decimais) / 2) + 1)
+
+                    posicao += nbytes
+
+                elif tipo.find('COMP') > -1:
+
+                    if  inteiro < 5:
+
+                        posicao += 2
+                        nbytes = 2
+
+                    elif inteiro < 10:
+
+                        posicao += 4
+                        nbytes = 4
+
+                    else:
+
+                        posicao += 8
+                        nbytes = 8
+
+                else:
+
+                    nbytes = inteiro + decimais
+                    posicao += nbytes
+
+            else:
+
+                nbytes = inteiro
+                posicao += nbytes
+
+        regc[cpo] = {}
+
+        regc[cpo]['nivel'] = nivel
+        regc[cpo]['natureza'] = pict
+        regc[cpo]['posicao'] = posdic[cpo]
+        regc[cpo]['picture'] = picts
+        regc[cpo]['tamanho'] = tam
+        regc[cpo]['inteiro'] = inteiro
+        regc[cpo]['decimais'] = decimais if decimais else 0
+        regc[cpo]['tipo'] = tipo
+        regc[cpo]['bytes'] = nbytes
+        regc[cpo]['redefines'] = redefines
+        regc[cpo]['itemGrupo'] = cpox
+        regc[cpo]['occurs'] = occurs
+
+    length = 0
+
+    nivel = 0
+
+    for k in regc:
+
+        if  regc[k]['redefines']:
+            nivel = regc[k]['nivel']
+            continue
+
+        if  nivel and regc[k]['nivel'] > nivel:
+            continue
+
+        nivel = 0
+
+        try:
+            bytes = int(regc[k]['bytes'])
+
+        except:
+            bytes = 0
+
+        try:
+            occurs = int(regc[k]['occurs'])
+
+        except:
+            occurs = 1
+
+        length += (bytes * (occurs if occurs else 1))
+
+    msg = 'calculo ok.'
+
+    return {'retorno': True, 'msg': msg, 'lrecl': length}
+
+def apath(path='', r=None):
+    """
+    Builds a path inside an application folder
+
+    Parameters
+    ----------
+    path:
+        path within the application folder
+    r:
+        the global request object
+
+    """
+
+    opath = up(r.folder)
+    while path[:3] == '../':
+        (opath, path) = (up(opath), path[3:])
+    return os.path.join(opath, path).replace('\\', '/')
+
+def app_create(db, app, request, force=False, key=None, info=False):
+    """
+    Create a copy of welcome.w2p (scaffolding) app
+
+    Parameters
+    ----------
+    app:
+        application name
+    request:
+        the global request object
+
+    """
+    path = apath(app, request)
+    if not os.path.exists(path):
+        try:
+            os.mkdir(path)
+        except:
+            if info:
+                return False, traceback.format_exc(sys.exc_info)
+            else:
+                return False
+    elif not force:
+        if info:
+            return False, "Application exists"
+        else:
+            return False
+    try:
+        w2p_unpack('welcome.w2p', path)
+        for subfolder in [
+            'models', 'views', 'controllers', 'databases',
+            'modules', 'cron', 'errors', 'sessions', 'cache',
+            'languages', 'static', 'private', 'uploads']:
+            subpath = os.path.join(path, subfolder)
+            if not os.path.exists(subpath):
+                os.mkdir(subpath)
+        dbt = os.path.join(path, 'models', 'db.py')
+        if os.path.exists(dbt):
+            data = read_file(dbt)
+            data = data.replace('<your secret key>',
+                                'sha512:' + (key or web2py_uuid()))
+            write_file(dbt, data)
+
+        parms = db(db.parametros.id==1).select()[0]
+
+        template = os.path.join('\\\\'
+                              , '127.0.0.1'
+                              , 'c$'
+                              , parms.web2py
+                              , 'applications'
+                              , parms.soag
+                              , 'Template'
+                              , 'web2py') + os.sep
+
+        models = os.path.join('\\\\'
+                            , '127.0.0.1'
+                            , 'c$'
+                            , parms.web2py
+                            , 'applications'
+                            , app
+                            , 'models') + os.sep
+
+        shutil.copyfile(template + 'addgets.py', models + 'addgets.py')
+
+        shutil.copyfile(template + 'forms.py', models + 'forms.py')
+
+        shutil.copyfile(template + 'listdetail.py', models + 'listdetail.py')
+
+        shutil.copyfile(template + 'menu1.py', models + 'menu.py')
+
+        shutil.copyfile(template + 'menu2.py', models + 'menu2.py')
+
+        if info:
+            return True, None
+        else:
+            return True
+    except:
+        shutil.rmtree(path)
+        if info:
+            return False, traceback.format_exc(sys.exc_info)
+        else:
+            return False

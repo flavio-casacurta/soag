@@ -52,7 +52,7 @@ def index():
                  '        AND entidades.id=%s;' % identidade)
 
     pgms = []
-    csvs = "Programa;Função;Entidade;Descrição\n"
+    csvs = "Programa;Funcao;Entidade;Descricao\n"
 
     for sql in sqls:
         if  sql[1] == 'T':

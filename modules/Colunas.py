@@ -19,6 +19,7 @@ class Colunas:
         self.parms       = self.db(self.parametros).select()[0]
         self.dicAbrev    = DicAbrev.DicAbrev(self.db)
         self.lengthCols  = LengthCols.LengthCols(self.db)
+        self.datatypes   = self.db.datatypes
 
     def insertColunas(self):
         lidos      = 0
@@ -57,7 +58,7 @@ class Colunas:
             if not attr:
                 attr=dicPre[k[:1]] if k[:1] in dicPre else 'WK'
                 attt=k[1:].replace('_',' ')
-                for word in utl.words(attt):
+                for word in utl.words(attt)[1]:
                     if word in dicabrev:
                         attr=attr+dicabrev[word][0].capitalize()
                     else:
@@ -113,7 +114,18 @@ class Colunas:
     def selectColunasByColumnName(self, columnName):
         try:
             query=self.db((self.colunas.codigoAplicacao == int(self.cAppl))
-                        & (self.colunas.columnName      == columnName)).select()
+                        & (self.colunas.columnName == columnName)).select()
+        except:
+            return [0,'Ocorreu um erro no Select da Tabela Colunas.', sys.exc_info()[1]]
+        if not query:
+            return [0,'(selectColunasByColumnName) Não foi encontrada a Coluna %s.' % columnName]
+        return [1, query]
+
+    def selectColunasResolvidasByColumnName(self, columnName):
+        try:
+            query=self.db((self.colunas.codigoAplicacao == int(self.cAppl))
+                        & (self.colunas.columnName == columnName)
+                        & (self.datatypes.id == self.colunas.codigoDatatype)).select()
         except:
             return [0,'Ocorreu um erro no Select da Tabela Colunas.', sys.exc_info()[1]]
         if not query:
@@ -128,3 +140,14 @@ class Colunas:
         if not query:
             return [0,'(selectColunasByColumnId) Não foi encontrada a Coluna %s.' % columnId]
         return [1, query]
+
+    def selectColunasByCodigoAplicacao(self):
+        try:
+            query=self.db((self.colunas.codigoAplicacao == int(self.cAppl))).select(orderby=self.colunas.id)
+        except:
+            return [0,'Ocorreu um erro no Select da Tabela Colunas.', sys.exc_info()[1]]
+        if not query:
+            return [0,'(selectColunasByCodigoAplicacao) Não foi encontrada nenhuma Coluna para a Aplicação %s.'
+                    % self.cAppl]
+        return [1, query]
+

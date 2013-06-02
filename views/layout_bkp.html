@@ -150,7 +150,7 @@
                        <div id="left_sidebar" {{=XML(left_sidebar_style)}} >
                             <div style="padding: 4px;">
                                  {{if  response.tipoMenu == 'dtree':}}
-                                       {{=response.menudtree}}
+                                       {{=dtree().menu(response.dtree)}}
                                  {{pass}}
                                  {{if  response.tipoMenu == 'etree':}}
                                        {{=etree().menu(response.etree)}}

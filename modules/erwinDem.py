@@ -6,6 +6,15 @@
    @author: C&C - HardSoft
 '''
 import win32, time
+from utilities import *
+ra = remover_acentos
+
+dic = {'SACL':'IMAG'
+      ,'Serviço de Apoio ao Cliente':'Sistema Imaginario'
+      ,'Servico de Apoio ao Cliente':'Sistema Imaginario'
+      ,'ServicoApoioCliente':'SistemaImaginario'
+      }
+
 
 class Erwin():
 
@@ -35,11 +44,66 @@ class Erwin():
             _erwin = win32.Erwin(arquivo)
             if  _erwin.erro:
                 return _erwin.erro
-            self._entitys       = _erwin.entitys
-            self._attributes    = _erwin.attributes
-            self._domains       = _erwin.domains
-            self._keyGroups     = _erwin.keyGroups
-            self._relationShips = _erwin.relationShips
+
+#            self._entitys       = _erwin.entitys
+            for k, v in _erwin.entitys.items():
+                if  v:
+                    if  isinstance(v, list):
+                        nv=[]
+                        for s in v:
+                            nv.append(change(dic, ra(s.encode('cp1252'))))
+                        v = nv
+                    if  isinstance(v, str):
+                        v = change(dic, ra(v.encode('cp1252')))
+                self._entitys[k]=v
+
+#            self._attributes    = _erwin.attributes
+            for k, v in _erwin.attributes.items():
+                if  v:
+                    if  isinstance(v, list):
+                        nv=[]
+                        for s in v:
+                            nv.append(change(dic, ra(s.encode('cp1252'))))
+                        v = nv
+                    if  isinstance(v, str):
+                        v = change(dic, ra(v.encode('cp1252')))
+                self._attributes[k]=v
+
+#            self._domains       = _erwin.domains
+            for k, v in _erwin.domains.items():
+                if  v:
+                    if  isinstance(v, list):
+                        nv=[]
+                        for s in v:
+                            nv.append(change(dic, ra(s.encode('cp1252'))))
+                        v = nv
+                    if  isinstance(v, str):
+                        v = change(dic, ra(v.encode('cp1252')))
+                self._domains[k]=v
+
+#            self._keyGroups     = _erwin.keyGroups
+            for k, v in _erwin.keyGroups.items():
+                if  v:
+                    if  isinstance(v, list):
+                        nv=[]
+                        for s in v:
+                            nv.append(change(dic, ra(s.encode('cp1252'))))
+                        v = nv
+                    if  isinstance(v, str):
+                        v = change(dic, ra(v.encode('cp1252')))
+                self._keyGroups[k]=v
+
+#            self._relationShips = _erwin.relationShips
+            for k, v in _erwin.relationShips.items():
+                if  v:
+                    if  isinstance(v, list):
+                        nv=[]
+                        for s in v:
+                            nv.append(change(dic, ra(s.encode('cp1252'))))
+                        v = nv
+                    if  isinstance(v, str):
+                        v = change(dic, ra(v.encode('cp1252')))
+                self._relationShips[k]=v
 
         if  picke:
             self._entitys       = picke['entitys']
@@ -261,7 +325,6 @@ class Erwin():
 
     def __setEntidadeColunas__(self):
 
-        f1 = open('c:\erwin\entidades.txt', 'w')
 
         for entidades in self._FisEntidades:
 
@@ -288,8 +351,6 @@ class Erwin():
                                                if 'Parent_Relationships_Ref' in
                                          self._FisEntidades[entidades] else '')
 
-            f1.write(' \n')
-            f1.write('Entidade: {} ({})\n'.format(nomelog, nomefis))
 
             self._entidadeColunas[nomefis] = []
 
@@ -305,9 +366,7 @@ class Erwin():
                     try:
                         attrs['nomeFisico'] = coluna['Physical_Name']
                     except:
-                        attrs['nomeFisico'] = \
-                                         coluna['User_Formatted_Physical_Name']
-
+                        attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
 
                     if  self.__existe__(self._entidadeColunas[nomefis], attrs['nomeFisico']):
                         continue
@@ -322,7 +381,6 @@ class Erwin():
                     attrs['null'] = True \
                                 if coluna['Null_Option_Type'] == '0' else False
                     self._entidadeColunas[nomefis].append(attrs)
-                    f1.write('    Coluna1: {} - {} - {}\n'.format(attrs['ordem'], attrs['nomeLogico'], attrs['nomeFisico']))
 
                 elif child and 'Parent_Relationship_Ref' in coluna and \
                                     coluna['Parent_Relationship_Ref'] == child:
@@ -330,8 +388,7 @@ class Erwin():
                     try:
                         attrs['nomeFisico'] = coluna['Physical_Name']
                     except:
-                        attrs['nomeFisico'] = \
-                                         coluna['User_Formatted_Physical_Name']
+                        attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
                     if  self.__existe__(self._entidadeColunas[nomefis], attrs['nomeFisico']):
                         continue
                     attrs['dataType'] = coluna['Physical_Data_Type']
@@ -345,15 +402,13 @@ class Erwin():
                     attrs['null'] = True \
                                 if coluna['Null_Option_Type'] == '0' else False
                     self._entidadeColunas[nomefis].append(attrs)
-                    f1.write('    Coluna2: {} - {} - {}\n'.format(attrs['ordem'], attrs['nomeLogico'], attrs['nomeFisico']))
 
                 elif order and 'Long_Id' in coluna and coluna['Long_Id'] == order:
                     attrs['nomeLogico'] = coluna['User_Formatted_Name']
                     try:
                         attrs['nomeFisico'] = coluna['Physical_Name']
                     except:
-                        attrs['nomeFisico'] = \
-                                         coluna['User_Formatted_Physical_Name']
+                        attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
                     if  self.__existe__(self._entidadeColunas[nomefis], attrs['nomeFisico']):
                         continue
                     attrs['dataType'] = coluna['Physical_Data_Type']
@@ -367,7 +422,6 @@ class Erwin():
                     attrs['null'] = True \
                                 if coluna['Null_Option_Type'] == '0' else False
                     self._entidadeColunas[nomefis].append(attrs)
-                    f1.write('    Coluna3: {} - {} - {}\n'.format(attrs['ordem'], attrs['nomeLogico'], attrs['nomeFisico']))
 
 
             for colunas in self._colunas:
@@ -382,8 +436,7 @@ class Erwin():
                     try:
                         attrs['nomeFisico'] = coluna['Physical_Name']
                     except:
-                        attrs['nomeFisico'] = \
-                                         coluna['User_Formatted_Physical_Name']
+                        attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
 
                     if  self.__existe__(self._entidadeColunas[nomefis], attrs['nomeFisico']):
                         continue
@@ -400,9 +453,7 @@ class Erwin():
                     attrs['null'] = True \
                                 if coluna['Null_Option_Type'] == '0' else False
                     self._entidadeColunas[nomefis].append(attrs)
-                    f1.write('    Coluna4: {} - {} - {}\n'.format(attrs['ordem'], attrs['nomeLogico'], attrs['nomeFisico']))
 
-        f1.close()
 
     def __existe__(self, colunas, coluna):
 
@@ -614,162 +665,3 @@ class Erwin():
                 ret.append([chave['Physical_Name'], ent['Physical_Name']])
 
         return ret
-
-    def formata(self, obj):
-
-        try:
-            obj = str(obj)
-        except UnicodeEncodeError:
-            # obj is unicode
-            try:
-                obj = unicode(obj).encode('unicode_escape', 'ignore')
-                for x in obj:
-                    if  ord(x) > 255:
-                        obj.replace(x, ' ')
-            except:
-                return ''
-
-        dic = {'\\xc7':'A', '\\xb5':'A', '\\xb7':'A',  '\\x84':'A',
-               '\\x90':'E', '\\xd4':'E', '\\xd3':'E',
-               '\\xd6':'I', '\\xde':'I', '\\xd8':'I',
-               '\\xe5':'O', '\\xe0':'O', '\\x99':'O',
-               '\\xe9':'U', '\\xeb':'U', '\\x9a':'U',
-               '\\xc6':'a', '\\xa0':'a', '\\x85':'a',  '\\x84':'a',
-               '\\xe3':'a', '\\xe1':'a', '\\xe2':'a',
-               '\\x82':'e', '\\x8a':'e', '\\x89':'e',  '\\xea':'e',
-               '\\xe4':'o', '\\xa2':'o', '\\x95':'o',  '\\x94':'o',
-               '\\xf3':'o', '\\xf4':'o', '\\xf5':'o',
-               '\\xa3':'u', '\\x97':'u', '\\x81':'u',  '\\xfa':'u',
-               '\\x87':'c', '\\xe7':'c', '\\r'  :'\r', '\\n'  :'\n'}
-
-        for k, v in dic.items():
-            try:
-                obj = obj.replace(k, v)
-            except:
-                break
-
-        return obj.replace('<', '').replace('>', '').replace('/', '')
-
-    def repEntidades(self):
-
-        entidades = self.getEntidades()
-
-        f1 = open(r'c:\\erwin\\repEntidades\\entidades.html', 'w')
-
-        f1.write('<html>')
-        f1.write('Total de Entidades: %s<br/><br/>' % len(entidades))
-
-        f1.write('<table border="1" width="100%">')
-        f1.write('<tr>')
-        f1.write('<td>Nome Logico</td>')
-        f1.write('<td>Nome Fisico</td>')
-        f1.write('<td>Qualificador</td>')
-        f1.write('</tr>')
-
-        for entidade in entidades:
-
-            f1.write('<tr>')
-
-            nomeLogico   = entidade['Name']
-            nomeFisico   = entidade['Physical_Name']
-            qualificador = entidade['Name_Qualifier']
-
-            f1.write('<td>%s</td>' % nomeLogico)
-            f1.write('<td>%s</td>' % nomeFisico)
-            f1.write('<td>%s</td>' % qualificador)
-            f1.write('</tr>')
-
-        f1.write('</table></html>')
-
-        f1.close()
-
-        return True
-
-    def repColunas(self):
-
-        colunas = self.getColunas()
-
-        f1 = open(r'c:\\erwin\\repColunas\\colunas.html', 'w')
-
-        f1.write('<html>')
-        f1.write('Total de Colunas: %s<br/><br/>' % len(colunas))
-
-        f1.write('<table border="1" width="100%">')
-        f1.write('<tr>')
-        f1.write('<td>Nome Logico</td>')
-        f1.write('<td>Nome Fisico</td>')
-        f1.write('<td>Data Type</td>')
-        f1.write('<td>Definicao</td>')
-        f1.write('</tr>')
-
-        for coluna in colunas:
-
-            nomeLogico = coluna['User_Formatted_Name']
-            nomeFisico = coluna['User_Formatted_Physical_Name']
-            dataType   = coluna['Logical_Data_Type']
-            definicao  = coluna['Definition']
-
-            f1.write('<tr>')
-            f1.write('<td>%s</td>' % nomeLogico)
-            f1.write('<td>%s</td>' % nomeFisico)
-            f1.write('<td>%s</td>' % dataType)
-            f1.write('<td>%s</td>' % definicao)
-            f1.write('</tr>')
-
-        f1.write('</table></html>')
-
-        f1.close()
-
-        return True
-
-    def repEntidadeColunas(self, entidade):
-
-        entidades = self.getEntidades(entidade)
-
-        if  not entidades: return []
-
-        if  isinstance(entidades, dict): entidades = [entidades]
-
-        for entidade in entidades:
-
-            entcols = self.getEntidadeColunas(entidade['Physical_Name'])
-
-            arquivo = u'c:\\erwin\\repEntidadeColunas\\%s.html' % \
-                                        self.formata(entidade['Physical_Name'])
-
-            f1 = open(arquivo, 'w')
-
-            f1.write('<html>')
-            f1.write('<table border="1" width="100%">')
-
-            pv = True
-
-            for entcol in entcols:
-
-                if  pv:
-                    f1.write('<tr>')
-                    f1.write('<td>Nome Logico</td>')
-                    f1.write('<td>Nome Fisico</td>')
-                    f1.write('<td>Data Type</td>')
-                    f1.write('<td>PK</td>')
-                    f1.write('<td>FK</td>')
-                    f1.write('<td>Null</td>')
-                    f1.write('<td>Definicao</td>')
-                    f1.write('</tr>')
-                    pv = False
-
-                f1.write('<tr>')
-                f1.write('<td>%s</td>' % self.formata(entcol['nomeLogico']))
-                f1.write('<td>%s</td>' % self.formata(entcol['nomeFisico']))
-                f1.write('<td>%s</td>' % self.formata(entcol['dataType']))
-                f1.write('<td>%s</td>' % self.formata(entcol['pk']))
-                f1.write('<td>%s</td>' % self.formata(entcol['fk']))
-                f1.write('<td>%s</td>' % self.formata(entcol['null']))
-                f1.write('<td>%s</td>' % self.formata(entcol['definicao']))
-                f1.write('</tr>')
-
-            f1.write('</table></html>')
-
-            f1.close()
-
-        return True

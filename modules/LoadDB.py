@@ -8,21 +8,30 @@ import Colunas
 import ColunasEntidades
 import PrimaryKeys
 import ForeignKeys
-import erwin as modelo
+#import erwin as modelo
+import erwinDem as modelo
 import os
+import utilities as utl
 
 def importarErwin(db, idErwin):
-
     parms = db(db.parametros.id == 1).select().first()
     erwint = db(db.erwins.id == idErwin).select().first()
-    orig = os.path.join( '\\\\'
+    path = os.path.join( '\\\\'
                        , '127.0.0.1'
                        , 'c$'
                        , parms.web2py
                        , 'applications'
                        , parms.soag
-                       , 'uploads'
-                       , erwint.arquivo)
+                       , 'uploads')
+
+    if  erwint.arquivo.endswith('.zip'):
+        fileIn = os.path.join( path
+                              , erwint.arquivo)
+        arquivo = utl.desCompact(fileIn, path)
+    else:
+        arquivo = erwint.arquivo
+    orig = os.path.join( path
+                       , arquivo)
 
     model = modelo.Erwin()
 
