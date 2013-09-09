@@ -1,0 +1,683 @@
+<div id="web2py_listdetail_form">
+    {{=form.custom.begin}}
+        {{name   = titulos[0]}}
+        {{idx    = 0}}
+        {{labels = ''}}
+        {{for titulo in titulos:}}
+              {{if  idx > 0:}}
+                    {{labels += '&nbsp;'}}
+              {{pass}}
+              {{labels += titulo}}
+              {{idx += 1}}
+        {{pass}}
+        <h4 align='center'>{{=XML(labels)}}</h4>
+        {{if  listaScroll and not noList:}}
+              <hr />
+              {{=XML(listaScroll)}}
+        {{pass}}
+        {{if form.errors:}}
+             {{try:}}
+                 {{labelErrors = form.labelErrors}}
+             {{except:}}
+                 {{labelErrors = None}}
+             {{pass}}
+             <hr />
+             <h5>{{='Erros Encontrados:' if not labelErrors else labelErrors}}</h5>
+             <ul>
+                 {{if  not labelErrors:}}
+                       {{for fieldname in form.errors:}}
+                             <li>{{=form.custom.label[fieldname]}} - Erro: {{=form.errors[fieldname]}}</li>
+                       {{pass}}
+                 {{else:}}
+                       {{for linha in form.errors:}}
+                             <li>{{=form.errors[linha]}}</li>
+                       {{pass}}
+                 {{pass}}
+             </ul>
+             {{form.errors.clear()}}
+        {{pass}}
+        {{if (not noDetail) or (noDetail and noDetail[0] <> '*'):}}
+             <hr />
+             <input type='hidden' id='action' name='action' value='submit' />
+             <table width='100%'>
+                {{id         = request.args(0) or 0}}
+                {{fields     = [f.name for f in tabela if (f.writable or f.readable) and not f.compute]}}
+                {{checkProcs = False}}
+                {{for field in fields:}}
+                      {{if  field in form.fields and field <> 'id' and field not in noDetail:}}
+                            {{try:}}
+                                  {{lookups = tabela.lookups}}
+                            {{except:}}
+                                  {{lookups = []}}
+                            {{pass}}
+                            {{try:}}
+                                  {{popupss = tabela.popups}}
+                            {{except:}}
+                                  {{popupss = []}}
+                            {{pass}}
+                            {{widget = str(form.custom.widget[field])}}
+                            {{if  checkFields:}}
+                                  {{if  field not in noCheckFields and widget.find('class="boolean"') > 0:}}
+                                        {{if  not checkProcs:}}
+                                              {{checkProcs = True}}
+                                              {{if  not keysCheckFields:}}
+                                                    {{for k in checkFields.keys():}}
+                                                          {{keysCheckFields.append(k)}}
+                                                    {{pass}}
+                                              {{pass}}
+                                              {{for k in keysCheckFields:}}
+                                                    <tr>
+                                                         <td align="right" width='{{=width_label}}'>{{=k}}:</td>
+                                                         {{v = checkFields[k]}}
+                                                         <td align="left" width='{{=width_field}}'>
+                                                              {{for z in v:}}
+                                                                    {{=XML('%s&nbsp;%s&nbsp;&nbsp;' % (form.custom.widget[z[1]], z[0]))}}
+                                                              {{pass}}
+                                                         </td>
+                                                    </tr>
+                                              {{pass}}
+                                        {{pass}}
+                                  {{else:}}
+                                        <tr>
+                                              <td align="right" width='{{=width_label}}'>{{='%s%s' % (form.custom.label[field], ':' \
+                                                      if form.custom.label[field] else '')}}</td>
+                                              <td align="left" width='{{=width_field}}'>
+                                                  {{if  lookups and lookups.has_key(field) and not field in noLookups:}}
+                                                        {{try:}}
+                                                             {{lkp = lookups[field][2]}}
+                                                        {{except:}}
+                                                             {{lkp = True}}
+                                                        {{pass}}
+                                                        {{try:}}
+                                                             {{idfield = form.custom.dspval[field] if form.custom.dspval[field] <> '&nbsp;' else 0}}
+                                                             {{if  lkp and isinstance(lookups[field][1], list):}}
+                                                                   {{value  = ''}}
+                                                                   {{select = db(eval('db[lookups[field][0]].'+tabela.pks[0]+'=='+str(idfield))).select()}}
+                                                                   {{for x in lookups[field][1]:}}
+                                                                         {{value += (' ' if value else '') + select[0][x] if select else ''}}
+                                                                   {{pass}}
+                                                             {{else:}}
+                                                                   {{value = idfield}}
+                                                             {{pass}}
+                                                             {{if  lkp:}}
+                                                                   {{=INPUT(_id='%s_%s' % (tabela, field), _name='%s' % field, _type='hidden',  _value='%s' % idfield)}}
+                                                                   {{=value}}
+                                                             {{else:}}
+                                                                   {{=XML(widget if widget <> 'None' else '')}}
+                                                                   {{try:}}
+                                                                       {{popup = tabela[field][popup]}}
+                                                                   {{except:}}
+                                                                       {{popup = None}}
+                                                                   {{pass}}
+                                                                   {{if  id and popup:}}
+                                                                         {{if  len(popup) == 2:}}
+                                                                               {{if  buttonPopup:}}
+                                                                                     {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                             _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                                   args=(id))+'\',\'230\',\'290\',\'280\',\'650\');'))}}
+                                                                               {{else:}}
+                                                                                     {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'),_href=URL(popup[1],args=(id)))}}
+                                                                               {{pass}}
+                                                                         {{pass}}
+                                                                         {{if  len(popup) == 3:}}
+                                                                               {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                       _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                             args=(id))+'\',\''+popup[2]+ \
+                                                                                             '\',\'290\',\'280\',\'650\');'))}}
+                                                                         {{pass}}
+                                                                         {{if  len(popup) == 4:}}
+                                                                               {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                       _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                             args=(id))+'\',\''+popup[2]+ \
+                                                                                             '\',\''+popup[3]+'\',\'280\',\'650\');'))}}
+                                                                         {{pass}}
+                                                                         {{if  len(popup) == 5:}}
+                                                                               {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                       _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                             args=(id))+'\',\''+popup[2]+ \
+                                                                                             '\',\''+popup[3]+'\',\''+popup[4]+'\',\'650\');'))}}
+                                                                         {{pass}}
+                                                                         {{if  len(popup) == 6:}}
+                                                                               {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                       _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                             args=(id))+'\',\''+popup[2]+'\',\''+ \
+                                                                                             popup[3]+'\',\''+popup[4]+'\',\''+popup[5]+'\');'))}}
+                                                                         {{pass}}
+                                                                   {{pass}}
+                                                             {{pass}}
+                                                        {{except:}}
+                                                             {{=XML(widget if widget <> 'None' else '')}}
+                                                             {{try:}}
+                                                                 {{popup = tabela[field][popup]}}
+                                                             {{except:}}
+                                                                 {{popup = None}}
+                                                             {{pass}}
+                                                             {{if  id and popup:}}
+                                                                   {{if  len(popup) == 2:}}
+                                                                         {{if  buttonPopup:}}
+                                                                               {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                         _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                                   args=(id))+'\',\'230\',\'290\',\'280\',\'650\');'))}}
+                                                                         {{else:}}
+                                                                               {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'),_href=URL(popup[1],args=(id)))}}
+                                                                         {{pass}}
+                                                                   {{pass}}
+                                                                   {{if  len(popup) == 3:}}
+                                                                         {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                 _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                       args=(id))+'\',\''+popup[2]+ \
+                                                                                       '\',\'290\',\'280\',\'650\');'))}}
+                                                                   {{pass}}
+                                                                   {{if  len(popup) == 4:}}
+                                                                         {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                 _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                       args=(id))+'\',\''+popup[2]+ \
+                                                                                       '\',\''+popup[3]+'\',\'280\',\'650\');'))}}
+                                                                   {{pass}}
+                                                                   {{if  len(popup) == 5:}}
+                                                                         {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                 _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                       args=(id))+'\',\''+popup[2]+ \
+                                                                                       '\',\''+popup[3]+'\',\''+popup[4]+'\',\'650\');'))}}
+                                                                   {{pass}}
+                                                                   {{if  len(popup) == 6:}}
+                                                                         {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                 _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                       args=(id))+'\',\''+popup[2]+'\',\''+ \
+                                                                                       popup[3]+'\',\''+popup[4]+'\',\''+popup[5]+'\');'))}}
+                                                                   {{pass}}
+                                                             {{pass}}
+                                                        {{pass}}
+                                                  {{else:}}
+                                                        {{if  field in extra:}}
+                                                              {{widget = XML(widget[0:widget.find('>')]  + \
+                                                                               ' onChange="extra(%s);"' % extra + \
+                                                                                   widget[widget.find('>'):])}}
+                                                        {{pass}}
+                                                        {{=XML(widget if widget <> 'None' else '')}}
+                                                        {{try:}}
+                                                            {{popup = tabela[field][popup]}}
+                                                        {{except:}}
+                                                            {{popup = None}}
+                                                        {{pass}}
+                                                        {{if  id and popup:}}
+                                                              {{if  len(popup) == 2:}}
+                                                                    {{if  buttonPopup:}}
+                                                                          {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                    _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                              args=(id))+'\',\'230\',\'290\',\'280\',\'650\');'))}}
+                                                                    {{else:}}
+                                                                          {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'),_href=URL(popup[1],args=(id)))}}
+                                                                    {{pass}}
+                                                              {{pass}}
+                                                              {{if  len(popup) == 3:}}
+                                                                    {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                            _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                  args=(id))+'\',\''+popup[2]+ \
+                                                                                  '\',\'290\',\'280\',\'650\');'))}}
+                                                              {{pass}}
+                                                              {{if  len(popup) == 4:}}
+                                                                    {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                            _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                  args=(id))+'\',\''+popup[2]+ \
+                                                                                  '\',\''+popup[3]+'\',\'280\',\'650\');'))}}
+                                                              {{pass}}
+                                                              {{if  len(popup) == 5:}}
+                                                                    {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                            _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                  args=(id))+'\',\''+popup[2]+ \
+                                                                                  '\',\''+popup[3]+'\',\''+popup[4]+'\',\'650\');'))}}
+                                                              {{pass}}
+                                                              {{if  len(popup) == 6:}}
+                                                                    {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                            _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                  args=(id))+'\',\''+popup[2]+'\',\''+ \
+                                                                                  popup[3]+'\',\''+popup[4]+'\',\''+popup[5]+'\');'))}}
+                                                              {{pass}}
+                                                        {{pass}}
+                                                  {{pass}}
+                                              </td>
+                                        </tr>
+                                  {{pass}}
+                            {{else:}}
+                                  <tr>
+                                        <td align="right" width='{{=width_label}}'>
+                                            {{='%s%s' % (form.custom.label[field], ':' if form.custom.label[field] else '')}}</td>
+                                        <td align="left" width='{{=width_field}}'>
+                                              {{if  lookups and lookups.has_key(field) and not field in noLookups:}}
+                                                    {{try:}}
+                                                         {{lkp = lookups[field][2]}}
+                                                    {{except:}}
+                                                         {{lkp = True}}
+                                                    {{pass}}
+                                                    {{try:}}
+                                                         {{idfield = form.custom.dspval[field] if form.custom.dspval[field] <> '&nbsp;' else 0}}
+                                                         {{if  lkp and isinstance(lookups[field][1], list):}}
+                                                               {{value   = ''}}
+                                                               {{select  = db(eval('db[lookups[field][0]].'+tabela.pks[0]+'=='+str(idfield))).select()}}
+                                                               {{if  idfield:}}
+                                                                     {{for x in lookups[field][1]:}}
+                                                                           {{value += (' ' if value else '') + select[0][x] if select else ''}}
+                                                                     {{pass}}
+                                                               {{pass}}
+                                                         {{else:}}
+                                                               {{value = idfield}}
+                                                         {{pass}}
+                                                         {{if  lkp:}}
+                                                               {{=INPUT(_id='%s_%s' % (tabela, field), _name='%s' % field, _type='hidden',  _value='%s' % idfield)}}
+                                                               {{=value}}
+                                                         {{else:}}
+                                                               {{if  field in extra:}}
+                                                                     {{widget = XML(widget[0:widget.find('>')]  + \
+                                                                                      ' onChange="extra(%s);"' % extra + \
+                                                                                          widget[widget.find('>'):])}}
+                                                               {{pass}}
+                                                               {{=XML(widget if widget <> 'None' else '')}}
+                                                               {{try:}}
+                                                                   {{popup = tabela[field][popup]}}
+                                                               {{except:}}
+                                                                   {{popup = None}}
+                                                               {{pass}}
+                                                               {{if  id and popup:}}
+                                                                     {{if  len(popup) == 2:}}
+                                                                           {{if  buttonPopup:}}
+                                                                                 {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                           _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                                     args=(id))+'\',\'230\',\'290\',\'280\',\'650\');'))}}
+                                                                           {{else:}}
+                                                                                 {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'),_href=URL(popup[1],args=(id)))}}
+                                                                           {{pass}}
+                                                                     {{pass}}
+                                                                     {{if  len(popup) == 3:}}
+                                                                           {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                   _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                         args=(id))+'\',\''+popup[2]+ \
+                                                                                         '\',\'290\',\'280\',\'650\');'))}}
+                                                                     {{pass}}
+                                                                     {{if  len(popup) == 4:}}
+                                                                           {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                   _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                         args=(id))+'\',\''+popup[2]+ \
+                                                                                         '\',\''+popup[3]+'\',\'280\',\'650\');'))}}
+                                                                     {{pass}}
+                                                                     {{if  len(popup) == 5:}}
+                                                                           {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                   _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                         args=(id))+'\',\''+popup[2]+ \
+                                                                                         '\',\''+popup[3]+'\',\''+popup[4]+'\',\'650\');'))}}
+                                                                     {{pass}}
+                                                                     {{if  len(popup) == 6:}}
+                                                                           {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                   _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                         args=(id))+'\',\''+popup[2]+'\',\''+ \
+                                                                                         popup[3]+'\',\''+popup[4]+'\',\''+popup[5]+'\');'))}}
+                                                                     {{pass}}
+                                                               {{pass}}
+                                                         {{pass}}
+                                                    {{except:}}
+                                                         {{=XML(widget if widget <> 'None' else '')}}
+                                                         {{try:}}
+                                                             {{popup = tabela[field][popup]}}
+                                                         {{except:}}
+                                                             {{popup = None}}
+                                                         {{pass}}
+                                                         {{if  id and popup:}}
+                                                               {{if  len(popup) == 2:}}
+                                                                     {{if  buttonPopup:}}
+                                                                           {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                     _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                               args=(id))+'\',\'230\',\'290\',\'280\',\'650\');'))}}
+                                                                     {{else:}}
+                                                                           {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'),_href=URL(popup[1],args=(id)))}}
+                                                                     {{pass}}
+                                                               {{pass}}
+                                                               {{if  len(popup) == 3:}}
+                                                                     {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                             _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                   args=(id))+'\',\''+popup[2]+'\',\'290\',\'280\',\'650\');'))}}
+                                                               {{pass}}
+                                                               {{if  len(popup) == 4:}}
+                                                                     {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                             _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                   args=(id))+'\',\''+popup[2]+ \
+                                                                                   '\',\''+popup[3]+'\',\'280\',\'650\');'))}}
+                                                               {{pass}}
+                                                               {{if  len(popup) == 5:}}
+                                                                     {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                             _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                   args=(id))+'\',\''+popup[2]+ \
+                                                                                   '\',\''+popup[3]+'\',\''+popup[4]+'\',\'650\');'))}}
+                                                               {{pass}}
+                                                               {{if  len(popup) == 6:}}
+                                                                     {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                             _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                   args=(id))+'\',\''+popup[2]+'\',\''+ \
+                                                                                   popup[3]+'\',\''+popup[4]+'\',\''+popup[5]+'\');'))}}
+                                                               {{pass}}
+                                                         {{pass}}
+                                                   {{pass}}
+                                              {{else:}}
+                                                    {{if  field in extra:}}
+                                                          {{widget = XML(widget[0:widget.find('>')]  + \
+                                                                           ' onChange="extra(%s);"' % extra + \
+                                                                               widget[widget.find('>'):])}}
+                                                    {{pass}}
+                                                    {{if  field in referback:}}
+                                                          {{=XML(widget + str(A('[ referback ]',_style=XML('cursor: pointer'),_onclick=XML('ajaxList(\'%s\',\'referback_%s\')' % (URL('referback'), field)))) if widget and widget <> 'None' else '')}}
+                                                          {{=XML("<div id='referback_%s'></div>" % field)}}
+                                                    {{else:}}
+                                                          {{widget = widget.replace('style="width:89%"','style="width:99%"')}}
+                                                          {{=XML(widget if widget and widget <> 'None' else '')}}
+                                                    {{pass}}
+                                                    {{try:}}
+                                                        {{popup = popupss[field]}}
+                                                    {{except:}}
+                                                        {{popup = None}}
+                                                    {{pass}}
+                                                    {{if  id and popup:}}
+                                                          {{if  len(popup) == 2:}}
+                                                                {{if  buttonPopup:}}
+                                                                      {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                                _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                                          args=(id))+'\',\'230\',\'290\',\'280\',\'650\');'))}}
+                                                                {{else:}}
+                                                                      {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'),_href=URL(popup[1],args=(id)))}}
+                                                                {{pass}}
+                                                          {{pass}}
+                                                          {{if  len(popup) == 3:}}
+                                                                {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                        _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                              args=(id))+'\',\''+popup[2]+'\',\'290\',\'280\',\'650\');'))}}
+                                                          {{pass}}
+                                                          {{if  len(popup) == 4:}}
+                                                                {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                        _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                              args=(id))+'\',\''+popup[2]+ \
+                                                                              '\',\''+popup[3]+'\',\'280\',\'650\');'))}}
+                                                          {{pass}}
+                                                          {{if  len(popup) == 5:}}
+                                                                {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                        _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                              args=(id))+'\',\''+popup[2]+ \
+                                                                              '\',\''+popup[3]+'\',\''+popup[4]+'\',\'650\');'))}}
+                                                          {{pass}}
+                                                          {{if  len(popup) == 6:}}
+                                                                {{=A(T('[ %s ]' % popup[0]),_style=XML('cursor: pointer'), \
+                                                                        _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                                              args=(id))+'\',\''+popup[2]+'\',\''+ \
+                                                                              popup[3]+'\',\''+popup[4]+'\',\''+popup[5]+'\');'))}}
+                                                          {{pass}}
+                                                    {{pass}}
+                                              {{pass}}
+                                        </td>
+                                  </tr>
+                            {{pass}}
+                      {{pass}}
+                {{pass}}
+                {{if  len(abas):}}
+                      <tr>
+                          <td align="right" width='{{=width_label}}'>{{=abas['label']}}:</td>
+                          <td align="center" width='{{=width_field}}'>
+                               {{idx = 0}}
+                               {{for fields in abas['fields']:}}
+                                     {{if  idx > 0:}} &nbsp;&nbsp; {{pass}}
+                                     {{=A(fields['label'],
+                                          _style=XML('cursor: pointer'),
+                                          _id=name+'_'+fields['field']+'__label',
+                                          _onclick=XML('hideabas();jQuery(\'#'+name+'_'+fields['field']+'__label\').text(\'[ '+ \
+                                                          fields['label']+' ]\');jQuery(\'#'+name+'_'+fields['field']+'__row\').show();'))}}
+                                     {{idx += 1}}
+                               {{pass}}
+                          </td>
+                      </tr>
+                      {{for fields in abas['fields']:}}
+                            <tr id='{{=name}}_{{=fields['field']}}__row' name='{{=name}}_{{=fields['field']}}__row'>
+                                 <td align="right" width='{{=width_label}}'>&nbsp;</td>
+                                 <td align="left" width='{{=width_field}}'>
+                                     {{if  lookups and lookups.has_key(fields['field']) and not fields['field'] in noLookups:}}
+                                           {{try:}}
+                                                {{lkp = lookups[field][2]}}
+                                           {{except:}}
+                                                {{lkp = True}}
+                                           {{pass}}
+                                           {{try:}}
+                                                {{idfield = form.custom.dspval[fields['field']] \
+                                                    if form.custom.dspval[fields['field']] <> '&nbsp;' else 0}}
+                                                {{if  lkp and isinstance(lookups[fields['field']][1], list):}}
+                                                      {{value  = ''}}
+                                                      {{select = db(eval('db[lookups[fields[field]][0]].'+tabela.pks[0]+'=='+str(idfield))).select()}}
+                                                      {{for x in lookups[fields['field']][1]:}}
+                                                            {{value += (' ' if value else '') + select[0][x] if select else ''}}
+                                                      {{pass}}
+                                                {{else:}}
+                                                      {{value = idfield}}
+                                                {{pass}}
+                                                {{if  lkp:}}
+                                                      {{=INPUT(_id='%s_%s' % (tabela, fields['field']), _name='%s' % fields['field'], _type='hidden',  _value='%s' % idfield)}}
+                                                      {{=value}}
+                                                {{else:}}
+                                                      {{=XML(widget if widget <> 'None' else '')}}
+                                                {{pass}}
+                                           {{except:}}
+                                                {{=XML(widget if widget <> 'None' else '')}}
+                                           {{pass}}
+                                     {{else:}}
+                                           {{widget = form.custom.widget[fields['field']]}}
+                                           {{if  fields['field'] in extra:}}
+                                                 {{widget = XML(widget[0:widget.find('>')]  + \
+                                                                  ' onChange="extra(%s);"' % extra + \
+                                                                      widget[widget.find('>'):])}}
+                                           {{pass}}
+                                           {{=XML(widget if widget <> 'None' else '')}}
+                                     {{pass}}
+                                 </td>
+                            </tr>
+                      {{pass}}
+                {{pass}}
+                {{if  id and extra:}}
+                      <tr id='target_extra'></tr>
+                {{pass}}
+                {{if  id and optionDelete:}}
+                      {{=forms().CheckDelete()}}
+                {{pass}}
+             </table>
+             <hr />
+             <table>
+                 <tr>
+                      {{if  extra:}}
+                            <script type="text/javascript">
+                                  function extra(opcoes) {
+                                      ret = ajax("{{=URL('extra')}}", opcoes, 'target_extra');
+                                  }
+                            </script>
+                      {{pass}}
+                      <td width={{='40%' if not id and livre else '100%'}} align="left">
+                          {{if  buttonClear:}}
+                                {{=A(T('Limpar'),_class='button',_href=URL())}}
+                          {{pass}}
+                          {{if  buttonProcess:}}
+                                {{=A(T(buttonProcessLabel),_class='button',_href=URL('processar'))}}
+                          {{pass}}
+                          {{if  buttonSelect:}}
+                                {{=A(T(buttonSelectLabel),_class='button',_onclick=XML("document.forms[0].action.value='select'; \
+                                                                                        document.forms[0].submit();"))}}
+                          {{pass}}
+                          {{if  buttonSelectProguess:}}
+                                &nbsp;&nbsp;
+                                {{for button in buttonSelectProguess:}}
+                                    {{if  len(button) == 3:}}
+                                          {{=A(T(button[0]),_class='button',_onClick=XML("ajaxProc(this,'%s','%s','%s');" % (button[0], button[1], button[2])))}}
+                                          &nbsp;<img src="{{=URL('static','images/ajax-loader.gif')}}" style="display: none;" id="imgProgress_{{=button[0]}}" />&nbsp;
+                                    {{else:}}
+                                          {{=A(T(button[0]),_class='button', \
+                                                _onclick=XML('popupw(\'' +URL(button[1])+'\',\''+button[2]+'\',\''+ \
+                                                        button[3]+'\',\''+button[4]+'\',\''+button[5]+'\');'))}}
+                                          &nbsp;&nbsp;
+                                        {{pass}}
+                                    {{pass}}
+                                {{pass}}
+                          {{pass}}
+                          {{if  id and buttons:}}
+                                {{for button in buttons:}}
+                                      {{if  len(button) == 2:}}
+                                            {{=A(T(button[0]),_class='button',_href=URL(button[1],args=(id)))}}
+                                      {{pass}}
+                                      {{if  len(button) == 3:}}
+                                            {{=A(T(button[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(button[1])+'\',\''+button[2]+ \
+                                                          '\',\'290\',\'280\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(button) == 4:}}
+                                            {{=A(T(button[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(button[1])+'\',\''+button[2]+ \
+                                                          '\',\''+button[3]+'\',\'280\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(button) == 5:}}
+                                            {{=A(T(button[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(button[1])+'\',\''+button[2]+ \
+                                                          '\',\''+button[3]+'\',\''+button[4]+'\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(button) == 6:}}
+                                            {{=A(T(button[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(button[1])+'\',\''+button[2]+'\',\''+ \
+                                                          button[3]+'\',\''+button[4]+'\',\''+button[5]+'\');'))}}
+                                      {{pass}}
+                                {{pass}}
+                          {{pass}}
+                          {{if  id and buttonsRefresh:}}
+                                {{for button in buttonsRefresh:}}
+                                      {{if  len(button) == 3:}}
+                                            {{=A(T(button[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(button[1])+'\',\''+button[2]+ \
+                                                          '\',\'290\',\'280\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(button) == 4:}}
+                                            {{=A(T(button[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(button[1])+'\',\''+button[2]+ \
+                                                          '\',\''+button[3]+'\',\'280\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(button) == 5:}}
+                                            {{=A(T(button[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(button[1])+'\',\''+button[2]+ \
+                                                          '\',\''+button[3]+'\',\''+button[4]+'\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(button) == 6:}}
+                                            {{=A(T(button[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(button[1])+'\',\''+button[2]+'\',\''+ \
+                                                          button[3]+'\',\''+button[4]+'\',\''+button[5]+'\');'))}}
+                                      {{pass}}
+                                {{pass}}
+                          {{pass}}
+                          {{if  buttonsAjax:}}
+                                {{for button in buttonsAjax:}}
+                                      {{=A(T(button[0]),_class='button',_onClick=XML("ajaxCall('%s','%s','%s');" % (button[1], button[2], button[3])))}}
+                                {{pass}}
+                          {{pass}}
+                          {{if  buttonsAjaxProguess:}}
+                                {{for button in buttonsAjaxProguess:}}
+                                      {{=A(T(button[0]),_class='button',_onClick=XML("ajaxProc(this,'%s','%s');" % (button[1], button[2])))}}
+                                {{pass}}
+                                &nbsp;<img src="{{=URL('static','images/ajax-loader.gif')}}" style="display: none;" id="imgProgress" />&nbsp;
+                          {{pass}}
+                          {{if  id and popups:}}
+                                {{for popup in popups:}}
+                                      {{if  len(popup) == 2:}}
+                                            {{if  buttonPopup:}}
+                                                  {{=A(T(popup[0]),_class='button',
+                                                        _onclick=XML('popupw(\'' +URL(popup[1],args=(id))+'\',\'230\',\'290\',\'280\',\'650\');'))}}
+                                            {{else:}}
+                                                  {{=A(T(popup[0]),_class='button',_href=URL(popup[1],args=(id)))}}
+                                            {{pass}}
+                                      {{pass}}
+                                      {{if  len(popup) == 3:}}
+                                            {{=A(T(popup[0]),_class='button',
+                                                  _onclick=XML('popupw(\'' +URL(popup[1],args=(id))+'\',\''+popup[2]+'\',\'290\',\'280\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(popup) == 4:}}
+                                            {{=A(T(popup[0]),_class='button',
+                                   _onclick=XML('popupw(\'' +URL(popup[1],args=(id))+'\',\''+popup[2]+'\',\''+popup[3]+'\',\'280\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(popup) == 5:}}
+                                            {{=A(T(popup[0]),_class='button', \
+                                                   _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                       args=(id))+'\',\''+popup[2]+'\',\''+popup[3]+'\',\''+popup[4]+'\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(popup) == 6:}}
+                                            {{=A(T(popup[0]),_class='button', \
+                                                   _onclick=XML('popupw(\'' +URL(popup[1], \
+                                                       args=(id))+'\',\''+popup[2]+'\',\''+popup[3]+'\',\''+popup[4]+'\',\''+popup[5]+'\');'))}}
+                                      {{pass}}
+                                {{pass}}
+                          {{pass}}
+                          {{if  executes:}}
+                                {{for execute in executes:}}
+                                      {{if  len(execute) == 2:}}
+                                            {{=A(T(execute[0]),_class='button',_href=URL(execute[1]))}}
+                                      {{pass}}
+                                      {{if  len(execute) == 3:}}
+                                            {{=A(T(execute[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(execute[1])+'\',\''+execute[2]+ \
+                                                          '\',\'290\',\'280\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(execute) == 4:}}
+                                            {{=A(T(execute[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(execute[1])+'\',\''+execute[2]+ \
+                                                          '\',\''+execute[3]+'\',\'280\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(execute) == 5:}}
+                                            {{=A(T(execute[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(execute[1])+'\',\''+execute[2]+ \
+                                                          '\',\''+execute[3]+'\',\''+execute[4]+'\',\'650\');'))}}
+                                      {{pass}}
+                                      {{if  len(execute) == 6:}}
+                                            {{=A(T(execute[0]),_class='button', \
+                                                    _onclick=XML('popupw(\'' +URL(execute[1])+'\',\''+execute[2]+'\',\''+ \
+                                                          execute[3]+'\',\''+execute[4]+'\',\''+execute[5]+'\');'))}}
+                                      {{pass}}
+                                {{pass}}
+                          {{pass}}
+                      </td>
+                       {{if  livre:}}
+                             <td align="right" width={{='70%' if id else '100%'}}>
+                                 {{=XML(livre)}}
+                             </td>
+                       {{pass}}
+                      {{if  buttonSubmit:}}
+                            <td align="right" width={{='30%' if id and livre else '100%'}}>
+                                {{=A(T('Enviar'),_class='button',_onclick=XML("document.forms[0].action.value='submit'; \
+                                                                               document.forms[0].submit();"))}}
+                            </td>
+                      {{pass}}
+                 </tr>
+             </table>
+        {{pass}}
+    {{=form.custom.end}}
+
+    {{if len(abas):}}
+         <script>
+            hideabas = function() {
+                {{idx  = 0}}
+                {{aba1 = ''}}
+                {{for fields in abas['fields']:}}
+                    jQuery('#{{=name}}_{{=fields['field']}}__label').text('{{=fields['label']}}');
+                    jQuery('#{{=name}}_{{=fields['field']}}__row').hide();
+                    {{if  idx == 0:}}
+                          {{lbl1 = fields['label']}}
+                          {{aba1 = fields['field']}}
+                    {{pass}}
+                    {{idx += 1}}
+                {{pass}}
+            };
+            jQuery(document).ready(function(){
+                hideabas();
+                jQuery('#{{=name}}_{{=aba1}}__label').text('[ {{=lbl1}} ]');
+                jQuery('#{{=name}}_{{=aba1}}__row').show();
+            });
+         </script>
+    {{pass}}
+</div>
+<script language="javascript">
+<!--
+ jQuery("#web2py_listdetail_form input:visible:enabled:first").focus();
+//-->
+</script>

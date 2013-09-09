@@ -1,0 +1,50 @@
+{{left_sidebar_enabled  = False}}
+{{right_sidebar_enabled = False}}
+
+{{extend 'layout.html'}}
+
+<div id="web2py_user_form" align='right'>
+    {{if (hasattr(form,'errors')) and (len(form.errors)>0):}}
+         O Formulário contêm os seguintes erros:
+         <ul>
+            {{for fieldname in form.errors:}}
+               <li>{{=fieldname.upper()}} erro: {{=form.errors[fieldname]}}</li>
+            {{pass}}
+         </ul>
+         <br />
+         {{form.errors.clear()}}
+    {{pass}}
+    {{if request.args(0)=='login':}}
+        {{=form.custom.begin}}
+            <table>
+                <tr>
+                    <td align='right'>Usuario:</td>
+                    <td>{{=form.custom.widget.username}}</td>
+                </tr>
+                <tr>
+                    <td align='right'>Senha:</td>
+                    <td>{{=form.custom.widget.password}}</td>
+                </tr>
+                <tr><td></td><td></td></tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        &nbsp;&nbsp;{{=A(T('Entrar'),_class='button',_onclick=XML("document.forms[0].submit();"))}}
+                    </td>
+                </tr>
+            </table>
+        {{=form.custom.end}}
+    {{else:}}
+        {{=form}}
+    {{pass}}
+    {{if request.args(0)=='login':}}
+        {{if not 'register' in auth.settings.actions_disabled:}}
+             <a href="{{=URL(r=request,args='register')}}">{{=T('register')}}</a>
+        {{pass}}
+    {{pass}}
+</div>
+<script language="javascript">
+<!--
+ jQuery("#web2py_user_form input:visible:enabled:first").focus();
+//-->
+</script>

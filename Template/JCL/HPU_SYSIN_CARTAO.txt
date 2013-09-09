@@ -1,0 +1,27 @@
+//@JOBNAME JOB '@APPLID,4220,PR14','@USER',MSGCLASS=Z,SCHENV=DB2
+//JOBLIB   DD DSN=AV.BIBGERTT,DISP=SHR
+//         DD DSN=AV.CHGM.LOADLIB.BSL.LOB,DISP=SHR
+//         DD DSN=AV.BIBGERAL,DISP=SHR
+//         DD DSN=SYS1.CEE.SCEERUN,DISP=SHR
+//         DD DSN=DB2A2.R2.DSNLOAD,DISP=SHR
+//*
+//@STEP    EXEC DB2A2HPU,UID='@TABLEUID'
+//*
+//* ***    ************************************************************
+//* ***    HPU - DESCARREGA A TABELA @TABLENAME EM ARQ.SEQUENCIAL.
+//* ***    ************************************************************
+//*
+//SYSPUNCH DD DSN=AD.C87.@ROTINA.HPU.SYSPUNCH.@TABLENAME,
+//       DISP=(,CATLG,DELETE),
+//       UNIT=(DISCO,30),
+//       SPACE=(TRK,(000250,0125),RLSE),
+//       DCB=(AD.A)
+//*
+//SYSREC01 DD DSN=AD.C87.@ROTINA.HPU.SYSREC01.@TABLENAME,
+//       DISP=(,CATLG,DELETE),
+//       UNIT=(DISCO,30),
+//       SPACE=(TRK,(000250,0125),RLSE),
+//       DCB=(AD.A)
+//*
+@SYSIN
+//*

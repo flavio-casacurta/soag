@@ -1,0 +1,35 @@
+div.scrollTable{
+    background: #fff;
+    border: 1px solid #888;
+}
+
+div.scrollTable table.header, div.scrollTable div.scroller table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+div.scrollTable table.header th, div.scrollTable div.scroller table td{
+    border: 1px solid #444;
+    padding: 3px 5px;
+}
+
+div.scrollTable table.header th{
+    background: #ddd;
+}
+
+div.scrollTable div.scroller{
+    height: 167px;
+    overflow: auto;
+}
+
+div.scrollTable .coluna75px{
+    width: 75px;
+}
+
+div.scrollTable .coluna100px{
+    width: 100px;
+}
+
+div.scrollTable .coluna150px{
+    width: 150px;
+}
