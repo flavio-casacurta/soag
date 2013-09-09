@@ -1,0 +1,38 @@
+# files
+
+*.pyc
+*.pyo
+progress.log
+routes.example.py
+.dropbox
+about
+license
+__init__.py
+todo.txt
+soag.accdb
+settings_local.db
+Apresenttacao.docx
+Meu todo.txt
+SOA.docx
+a.py
+aa.py
+
+# folders
+
+/aderbal
+/cron
+/models
+/uploads
+/databases
+/sessions
+/cache
+/errors
+/private
+/languages
+<<<<<<< HEAD
+/Template
+
+=======
+/Templates
+>>>>>>> 74ffdcca84ab30dba4acd1ca72b1d0ea03dd8b1d
+
