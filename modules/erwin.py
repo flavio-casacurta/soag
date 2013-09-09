@@ -5,7 +5,7 @@
    Created on 22/10/2011
    @author: C&C - HardSoft
 '''
-import win32, time
+import win32, time, string
 
 class Erwin():
 
@@ -23,8 +23,9 @@ class Erwin():
         self._relationShips   = {}
         self._relacoes        = {}
         self._entidadeColunas = {}
+        self._setColumns      = set()
 
-    def load(self, arquivo='', picke=''):
+    def load(self, arquivo='', picke='', all=True):
 
         t0 = time.time()
 
@@ -49,11 +50,18 @@ class Erwin():
             self._relationShips = picke['relationShips']
 
         self.__setDominios__()
+        print 'setDominios'
         self.__setChaves__()
+        print 'setChaves'
         self.__setRelacoes__()
+        print 'setRelacoes'
         self.__setEntidades__()
+        print 'setEntidades'
         self.__setColunas__()
-        self.__setEntidadeColunas__()
+        print 'setColunas'
+        if  all:
+            self.__setEntidadeColunas__()
+            print 'setEntidadeColunas'
 
         print '        Tempo corrido:', time.time() - t0
 
@@ -322,6 +330,7 @@ class Erwin():
                     attrs['null'] = True \
                                 if coluna['Null_Option_Type'] == '0' else False
                     self._entidadeColunas[nomefis].append(attrs)
+                    self._setColumns.add(attrs['nomeFisico'])
                     f1.write('    Coluna1: {} - {} - {}\n'.format(attrs['ordem'], attrs['nomeLogico'], attrs['nomeFisico']))
 
                 elif child and 'Parent_Relationship_Ref' in coluna and \
@@ -345,6 +354,7 @@ class Erwin():
                     attrs['null'] = True \
                                 if coluna['Null_Option_Type'] == '0' else False
                     self._entidadeColunas[nomefis].append(attrs)
+                    self._setColumns.add(attrs['nomeFisico'])
                     f1.write('    Coluna2: {} - {} - {}\n'.format(attrs['ordem'], attrs['nomeLogico'], attrs['nomeFisico']))
 
                 elif order and 'Long_Id' in coluna and coluna['Long_Id'] == order:
@@ -367,6 +377,7 @@ class Erwin():
                     attrs['null'] = True \
                                 if coluna['Null_Option_Type'] == '0' else False
                     self._entidadeColunas[nomefis].append(attrs)
+                    self._setColumns.add(attrs['nomeFisico'])
                     f1.write('    Coluna3: {} - {} - {}\n'.format(attrs['ordem'], attrs['nomeLogico'], attrs['nomeFisico']))
 
 
@@ -400,6 +411,7 @@ class Erwin():
                     attrs['null'] = True \
                                 if coluna['Null_Option_Type'] == '0' else False
                     self._entidadeColunas[nomefis].append(attrs)
+                    self._setColumns.add(attrs['nomeFisico'])
                     f1.write('    Coluna4: {} - {} - {}\n'.format(attrs['ordem'], attrs['nomeLogico'], attrs['nomeFisico']))
 
         f1.close()
@@ -446,23 +458,40 @@ class Erwin():
 
         return self._relationShips
 
-    def getMaxSequencia(self, cpo):
+    def getMaxSequencia(self, db, iderwin, prm, cpo):
 
-        ret = 0
+        try:
+            query=db((db.erwinents.erwin == iderwin)
+                   &(eval("db.erwinents.{}.like('{}%')".format(cpo, prm)))).select(
+                                        eval('db.erwinents.{}.max()'.format(cpo)))
+        except:
+            return 1
 
-        for entidades in self._FisEntidades:
+        if  query:
+            return self.addSequencia(query[0]._extra['MAX(erwinents.{})'.format(cpo)])
 
-            entidade = self._FisEntidades[entidades]
+        return 1
 
-            try:
-                seq = int(entidade['Entity.Physical.%s' % cpo])
-            except:
-                seq = 0
+    def addSequencia(self, cpo):
 
-            if  seq > ret:
-                ret = seq
+        char = string.digits + string.ascii_uppercase
 
-        return ret
+        c4 = char.index(cpo[7:8])
+        c3 = char.index(cpo[6:7])
+        c2 = char.index(cpo[5:6])
+
+        c4 += 1
+
+        if  c4 > 35:
+            c3 += 1
+            c4  = 0
+            if  c3 > 35:
+                c2 += 1
+                c3  = 0
+                if  c2 > 35:
+                    c2 = 0
+
+        return char[c2] + char[c3] + char[c4]
 
     def getEntityPhysical(self):
 
@@ -490,7 +519,7 @@ class Erwin():
                 try:
                     return self._FisEntidades[entidade]
                 except:
-                    return {}
+                    return []
         else:
             ret = []
             for key in self._FisEntidades:
@@ -516,7 +545,8 @@ class Erwin():
         ret = []
 
         for key in self._colunas:
-            ret.append(self._colunas[key])
+            if  self._colunas[key]['Physical_Name'] in self._setColumns:
+                ret.append(self._colunas[key])
 
         return ret
 
@@ -608,9 +638,11 @@ class Erwin():
         for chave in chaves:
             owner = chave['Owner_Path'].split('.')
             if  len(owner) > 2:
-                if   owner[2].startswith('XPK') and len(chaves) > 1:
+                if  owner[2].startswith('XPK') and len(chaves) > 1:
                     continue
                 ent = self.getEntidades(owner[1])
+                if  not  ent:
+                    continue
                 ret.append([chave['Physical_Name'], ent['Physical_Name']])
 
         return ret
@@ -773,3 +805,5 @@ class Erwin():
             f1.close()
 
         return True
+
+# vim: ft=python

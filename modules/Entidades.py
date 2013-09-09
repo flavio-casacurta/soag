@@ -6,6 +6,7 @@
 import sys
 import Aplicacao
 import ColunasEntidades
+import traceback
 
 class Entidades:
 
@@ -63,7 +64,6 @@ class Entidades:
 
             if  dicEnts[k]['descricao']:
                 dicEnts[k]['descricao'] = ' '.join(dicEnts[k]['descricao'].split())
-#                dicEnts[k]['descricao'] = utl.nUni2Uni(' '.join(dicEnts[k]['descricao'].split()))
             else:
                 dicEnts[k]['descricao'] = dicEnts[k]['nomeAmigavel']
 
@@ -96,20 +96,21 @@ class Entidades:
         if  self.delecaoLogica:
             colEnt   = ColunasEntidades.ColunasEntidades(self.db, cAppl=self.cAppl)
         try:
-            for query in self.db(self.entidades).select():
+            for query in self.db(self.entidades.codigoAplicacao == int(self.cAppl)).select():
                 lidos += 1
-                if  not query.nomeExterno.startswith(self.applId):
-                    lisPgm = [False for p in xrange(10)]
-                else:
-                    lisPgm = [True  for p in xrange(10)]
-                    if  self.delecaoLogica:
-                        ce = colEnt.selectColunasEntidadesByCodigoEntidade(query.id)
-                        if  not ce[0]:
-                            return [0, 'Ocorreu um erro no Update da Tabela Entidades,\
-                                        no selectColunasEntidadesByCodigoEntidade']
-                        if  isTrue(self.colDelLog, ce[1], 'codigoColuna'):
-                            lisPgm[4] = False
-                            lisPgm[5] = False
+# RETIRADO POIS O NOME EXTERNO PODE SER DE OUTRO DB
+#                if  not query.nomeExterno.startswith(self.applId):
+#                    lisPgm = [False for p in xrange(10)]
+#                else:
+                lisPgm = [True  for p in xrange(10)]
+                if  self.delecaoLogica:
+                    ce = colEnt.selectColunasEntidadesByCodigoEntidade(query.id)
+                    if  not ce[0]:
+                        return [0, 'Ocorreu um erro no Update da Tabela Entidades,\
+                                    no selectColunasEntidadesByCodigoEntidade']
+                    if  isTrue(self.colDelLog, ce[1], 'codigoColuna'):
+                        lisPgm[4] = False
+                        lisPgm[5] = False
                 try:
                     self.db((self.entidades.codigoAplicacao  == int(self.cAppl))
                           & (self.entidades.id               == query.id))         \
@@ -126,9 +127,10 @@ class Entidades:
                                      )
                     gravados = gravados +1
                 except:
-                    return [0, 'Ocorreu um erro no Update da Tabela Entidades.', sys.exc_info()[1]]
+                    return [0, 'Ocorreu um erro no Update da Tabela Entidades.', traceback.format_exc(sys.exc_info)]
         except:
-            return [0,'Ocorreu um erro no Select da Tabela Entidades.', sys.exc_info()[1]]
+#            return [0,'Ocorreu um erro no Select da Tabela Entidades.', traceback.format_exc()]
+            return [0, traceback.format_exc()]
 
         self.db.commit()
         return [1,'Programas das Entidades >>>'

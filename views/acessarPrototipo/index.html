@@ -1,0 +1,33 @@
+{{left_sidebar_enabled  = True}}
+{{right_sidebar_enabled = False}}
+
+{{extend  "layout.html"}}
+
+<form  action="" enctype="multipart/form-data" method="post">
+    <input type='hidden' id='action' name='action' value='submit' />
+    <br />
+    <h4 align='center'>{{=BEAUTIFY('Acessar Protótipo da Aplicação')}}</h4>
+    <h4 align='center'>{{=XML('Aplicação: %s' % aplicacao)}}</h4>
+    {{if mensagens:}}
+        <hr />
+        <h5>Resultado:</h5>
+        <ul>
+            {{for mensagem in mensagens:}}
+                <li>{{=mensagem}}</li>
+            {{pass}}
+        </ul>
+    {{pass}}
+    <hr />
+    <table>
+        <tr>
+            <td width=999 align="left">
+                {{=A(T('Clear'),_class='button',_href=URL('clear'))}}
+            </td>
+            {{if session.aplicacao_id:}}
+                <td width=999 align="right">
+                    {{=A(T('Acessar'),_class='button',_href=URL('acessar'))}}
+                </td>
+            {{pass}}
+        </tr>
+    </table>
+</form>

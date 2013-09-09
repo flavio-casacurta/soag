@@ -19,8 +19,10 @@ class Aplicacao:
            self.grupo               = self.query[0].grupo
            self.analista            = self.query[0].analista
            self.ownerDb2            = self.query[0].ownerDb2
+           self.modeloDb            = self.query[0].modeloDb
+           self.nomeLogo            = self.query[0].nome
+           self.applLogo            = self.query[0].logo
            self.soag                = self.query[0].soag
-           self.glog                = self.query[0].glog
            self.delecaoLogica       = self.query[0].delecaoLogica
            self.colunaDelecaoLogica = self.query[0].colunaDelecaoLogica
            self.empresa             = self.query[0].empresa
@@ -31,8 +33,10 @@ class Aplicacao:
            self.grupo               = ''
            self.analista            = ''
            self.ownerDb2            = ''
+           self.modeloDb            = ''
+           self.nomeLogo            = ''
+           self.applLogo            = None
            self.soag                = 0
-           self.glog                = 0
            self.delecaoLogica       = 0
            self.colunaDelecaoLogica = ''
            self.empresa             = 0
@@ -55,11 +59,17 @@ class Aplicacao:
    def getOwnerDb2(self):
        return self.ownerDb2
 
+   def getModeloDb(self):
+       return self.modeloDb
+
+   def getNomeLogo(self):
+       return self.nomeLogo
+
+   def getApplLogo(self):
+       return self.applLogo
+
    def getSoag(self):
        return self.soag
-
-   def getGlog(self):
-       return self.glog
 
    def getDelecaoLogica(self):
        return self.delecaoLogica
@@ -69,5 +79,3 @@ class Aplicacao:
 
    def getEmpresaId(self):
        return self.empresa
-
-# vim: ft=python

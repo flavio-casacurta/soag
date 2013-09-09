@@ -7,6 +7,7 @@ import sys
 import Entidades
 import Colunas
 import Datatypes
+import OrigemColunasAplicacao
 
 class PrimaryKeys(object):
 
@@ -23,12 +24,15 @@ class PrimaryKeys(object):
 
         entidades   = Entidades.Entidades(self.db, cAppl=self.cAppl)
         colunas     = Colunas.Colunas(self.db, cAppl=self.cAppl)
-        lisNum      = Datatypes.Datatypes(self.db).getDatatypesNumerics()
+        orca        = OrigemColunasAplicacao.OrigemColunasAplicacao(self.db)
+        lisAuto     = Datatypes.Datatypes(self.db).getDatatypesNumerics()
+        lisAuto.append('TIMESTAMP')
         generate    = lambda ent: ent['Do_Not_Generate']==False
         nomeFisico  = lambda line: line['User_Formatted_Physical_Name']
         isPk        = lambda line: line['pk']==True
         isFk        = lambda line: line['fk']<>[]
-        isNum       = lambda line: line['dataType'].split('(')[0] in lisNum
+        isAuto      = lambda line: line['dataType'].split('(')[0] in lisAuto
+        isTimestamp = lambda line: line['dataType'].split('(')[0] == 'TIMESTAMP'
 
         for nomeFisicoEntidade in map(nomeFisico, filter(generate, self.model.getEntidades(''))):
             returnEntidade       = entidades.selectEntidadesByNomeFisico(nomeFisicoEntidade)
@@ -50,18 +54,18 @@ class PrimaryKeys(object):
                            , returnCodigoColuna[1]]
                 coluna             = returnCodigoColuna[1][0]
 
-                if  isFk(pk) or qtdPk < lenPk:
-                    codigoInsercao = 1
-                else:
-                    if  isNum(pk):
-                        codigoInsercao = 3
-
+                codigoInsercao = 1
+                if  not isFk(pk) and qtdPk == lenPk and isAuto(pk):
+                    codigoInsercao = 3
+                    if  isTimestamp(pk):
+                        orca.insertOrigemColunasAplicacao(self.cAppl, coluna.id)
                 try:
                     self.primarykeys.insert(codigoAplicacao = self.cAppl
                                            ,codigoEntidade  = entidade.id
                                            ,codigoColuna    = coluna.id
                                            ,codigoInsercao  = codigoInsercao)
                     gravados = gravados +1
+
                 except:
                    return [0,"PK - Ocorreu um erro no Insert da Tabela PrimaryKeys.", sys.exc_info()[1]]
         self.db.commit()

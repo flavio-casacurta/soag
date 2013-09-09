@@ -128,7 +128,7 @@ def index():
                                       if (idstatus<>3 and \
                                           db(db.booksTxt.status==2).count())  \
                                       else False,
-                                  buttonSubmit=True))
+                                  buttonSubmit=True if idaplicacao and idstatus else False))
 
 @auth.requires_login()
 def processar():
@@ -217,3 +217,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

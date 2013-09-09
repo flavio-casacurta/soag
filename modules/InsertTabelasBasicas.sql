@@ -1,6 +1,6 @@
 -- insert parametros
 INSERT INTO parametros(raiz, web2py, log, soag)
-    VALUES ('SOAG', 'web2py', 'temp', 'soagDes2');
+    VALUES ('SOAG', 'web2py', 'temp', 'soag');
 
 -- insert empresa
 INSERT INTO empresa(nome, descricao, ativo)
@@ -4538,7 +4538,7 @@ INSERT INTO regras(origem, regra, descricao, argumento1, argumento2, visivel, ti
 INSERT INTO regras(origem, regra, descricao, argumento1, argumento2, visivel, tipoprograma)
     VALUES (2, 'DT','Data Formato DD/MM/YYYY','T','F','F', 1);
 INSERT INTO regras(origem, regra, descricao, argumento1, argumento2, visivel, tipoprograma)
-    VALUES (2, 'TM','Time Formato HH:MM:SS','T','F','F', 1);
+    VALUES (2, 'TM','Hora Formato HH:MM:SS','T','F','F', 1);
 INSERT INTO regras(origem, regra, descricao, argumento1, argumento2, visivel, tipoprograma)
     VALUES (2, 'TS','Timestamp','T','F','F', 1);
 INSERT INTO regras(origem, regra, descricao, argumento1, argumento2, visivel, tipoprograma)
@@ -4563,6 +4563,10 @@ INSERT INTO regras(origem, regra, descricao, argumento1, argumento2, visivel, ti
     VALUES (1, 'V','Validacao','F','F','T', 2);
 INSERT INTO regras(origem, regra, descricao, argumento1, argumento2, visivel, tipoprograma)
     VALUES (1, 'O','Outros','F','F','T', 2);
+INSERT INTO regras(origem, regra, descricao, argumento1, argumento2, visivel, tipoprograma)
+    VALUES (2, 'EM','E-Mail','F','F','T', 1);
+INSERT INTO regras(origem, regra, descricao, argumento1, argumento2, visivel, tipoprograma)
+    VALUES (2, 'NU','Numérico','F','F','T', 1);
 
 -- Insert MensagensPadraoPrefixo
 INSERT INTO mensagenspadraoprefixo(origem, descricao)
@@ -4585,6 +4589,14 @@ INSERT INTO mensagenspadraoprefixo(origem, descricao)
     VALUES (1, ' ');
 INSERT INTO mensagenspadraoprefixo(origem, descricao)
     VALUES (2, ' ');
+INSERT INTO mensagenspadraoprefixo(origem, descricao)
+    VALUES (2, 'Data');
+INSERT INTO mensagenspadraoprefixo(origem, descricao)
+    VALUES (2, 'Hora');
+INSERT INTO mensagenspadraoprefixo(origem, descricao)
+    VALUES (2, 'Coluna');
+INSERT INTO mensagenspadraoprefixo(origem, descricao)
+    VALUES (2, 'Conteúdo');
 
 -- Insert MensagensPadraoSufixo
 INSERT INTO mensagenspadraosufixo(origem, descricao)
@@ -4627,6 +4639,18 @@ INSERT INTO mensagenspadraosufixo(origem, descricao)
     VALUES (1, ' ');
 INSERT INTO mensagenspadraosufixo(origem, descricao)
     VALUES (2, ' ');
+INSERT INTO mensagenspadraosufixo(origem, descricao)
+    VALUES (2, 'Deve estar no formato DD/MM/YYYY');
+INSERT INTO mensagenspadraosufixo(origem, descricao)
+    VALUES (2, 'Deve estar no formato HH:MM:SS');
+INSERT INTO mensagenspadraosufixo(origem, descricao)
+    VALUES (2, 'Deve estar entre');
+INSERT INTO mensagenspadraosufixo(origem, descricao)
+    VALUES (2, 'Deve ser um e-mail válido');
+INSERT INTO mensagenspadraosufixo(origem, descricao)
+    VALUES (2, 'Inválido');
+INSERT INTO mensagenspadraosufixo(origem, descricao)
+    VALUES (2, 'Não Numérico');
 
 -- Insert mensagensPadraoSOAG
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
@@ -4660,13 +4684,13 @@ INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, cod
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
     VALUES (2,1,12,6,14);
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
-    VALUES (2,1,13,6,15);
+    VALUES (2,1,13,6,23);
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
     VALUES (2,1,14,6,16);
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
-    VALUES (2,1,15,10,20);
+    VALUES (2,1,15,11,21);
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
-    VALUES (2,1,16,10,20);
+    VALUES (2,1,16,12,22);
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
     VALUES (2,1,17,10,20);
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
@@ -4676,7 +4700,12 @@ INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, cod
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
     VALUES (1,1,20,9,17);
 INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
-    VALUES (1,1,10,7,18);
+    VALUES (2,1,10,6,12);
+INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
+    VALUES (2,1,29,13,24);
+INSERT INTO mensagenspadraoSoag(codigoorigemmsg, codigotipomsg, codigoregra, codigomsgprefixo, codigomsgsufixo)
+    VALUES (2,1,30,14,26);
+
 
 -- Insert origemcolunasapoio
 INSERT INTO origemcolunasapoio( origem, descricao, fonte)
@@ -4687,18 +4716,18 @@ INSERT INTO origemcolunasapoio( origem, descricao, fonte)
     VALUES ('FRWKWAAA-CCANAL', 'Canal do FrameWork', 'F');
 INSERT INTO origemcolunasapoio( origem, descricao, fonte)
     VALUES ('FRWKWAAA-TIPO-USUAR', 'Tipo Usuario do FrameWork', 'F');
-INSERT INTO origemcolunasapoio( origem, descricao, fonte)
-    VALUES ('FRWKWAAA-CAUTEN-SEGRC(1:9)', 'Usuario do FrameWork', 'F');
+INSERT INTO origemcolunasapoio( origem, descricao, fonte, controller)
+    VALUES ('FRWKWAAA-CAUTEN-SEGRC(1:9)', 'Usuario do FrameWork', 'F', 'auth.user.username');
 INSERT INTO origemcolunasapoio( origem, descricao, fonte)
     VALUES ('FRWKWAAA-TIPO-USUAR-AUTORIZ', 'Tipo Usuario Autorizado do FrameWork', 'F');
 INSERT INTO origemcolunasapoio( origem, descricao, fonte)
     VALUES ('FRWKWAAA-USUARIO-AUTORIZ', 'Usuario Autorizado do FrameWork', 'F');
-INSERT INTO origemcolunasapoio( origem, descricao, fonte)
-    VALUES ('CURRENT TIMESTAMP', 'Timestamp Apurado pelo Sistema', 'S');
-INSERT INTO origemcolunasapoio( origem, descricao, fonte)
-    VALUES ('PARTITIONH', 'Particao Horizontal Calculada pelo Sistema', 'S');
-INSERT INTO origemcolunasapoio( origem, descricao, fonte)
-    VALUES ('PARTITIONV', 'Particao Vertical Calculada pelo Sistema', 'S');
+INSERT INTO origemcolunasapoio( origem, descricao, fonte, controller)
+    VALUES ('CURRENT TIMESTAMP', 'Timestamp Apurado pelo Sistema', 'S', 'str(datetime.datetime.today())[:-7]');
+INSERT INTO origemcolunasapoio( origem, descricao, fonte, controller)
+    VALUES ('PARTITIONH', 'Particao Horizontal Calculada pelo Sistema', 'S', 'PARTITIONH');
+INSERT INTO origemcolunasapoio( origem, descricao, fonte, controller)
+    VALUES ('PARTITIONV', 'Particao Vertical Calculada pelo Sistema', 'S', 'PARTITIONV');
 
 -- insert Status
 INSERT INTO Status (id, descricao) VALUES (1, 'Todos');
@@ -4707,7 +4736,21 @@ INSERT INTO Status (id, descricao) VALUES (3, 'Ok');
 
 -- insert statuserwin
 INSERT INTO statuserwin (id, descricao) VALUES (1, 'Todos');
-INSERT INTO statuserwin (id, descricao) VALUES (2, 'Pendente Importacao');
-INSERT INTO statuserwin (id, descricao) VALUES (3, 'Pendente Validacao');
+INSERT INTO statuserwin (id, descricao) VALUES (2, 'Pendente Importação');
+INSERT INTO statuserwin (id, descricao) VALUES (3, 'Pendente Validação');
 INSERT INTO statuserwin (id, descricao) VALUES (4, 'Pendente Processamento');
 INSERT INTO statuserwin (id, descricao) VALUES (5, 'Ok');
+INSERT INTO statuserwin (id, descricao) VALUES (6, 'Ok');
+
+-- insert statussgdb
+INSERT INTO statussgdb (id, descricao) VALUES (1, 'Todos');
+INSERT INTO statussgdb (id, descricao) VALUES (2, 'Pendente Conexão');
+INSERT INTO statussgdb (id, descricao) VALUES (3, 'Pendente Importação');
+INSERT INTO statussgdb (id, descricao) VALUES (4, 'Pendente Validação');
+INSERT INTO statussgdb (id, descricao) VALUES (5, 'Pendente Processamento');
+INSERT INTO statussgdb (id, descricao) VALUES (6, 'Ok');
+
+-- insert sgdb
+INSERT INTO sgdb VALUES (1, 'PostgreSQL', 'postgres');
+INSERT INTO sgdb VALUES (2, 'MySql', 'mysql');
+INSERT INTO sgdb VALUES (3, 'DB2', 'ibm_db_sa');

@@ -4,6 +4,7 @@
    @author: C&C - HardSoft
 '''
 import sys
+import traceback
 
 class MensagensPadrao:
 
@@ -47,3 +48,14 @@ class MensagensPadrao:
        except:
            return [0, 'Ocorreu um erro no Select da Tabela MensagensPadrao.', sys.exc_info()[1]]
        return dicMensagens
+
+   def selectMensagenPadraoByDados(self, codigoOrigemMsg, codigoTipoMsg, codigoRegra):
+       try:
+           query = self.db((self.mensagensPadrao.codigoAplicacao == int(self.cAppl))
+                          &(self.mensagensPadrao.codigoOrigemMsg == int(codigoOrigemMsg))
+                          &(self.mensagensPadrao.codigoTipoMsg   == int(codigoTipoMsg))
+                          &(self.mensagensPadrao.codigoRegra     == int(codigoRegra))).select(
+                            self.mensagensPadrao.id).first()
+       except:
+           return False, traceback.format_exc(sys.exc_info)
+       return query

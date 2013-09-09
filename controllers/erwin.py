@@ -28,6 +28,17 @@ def index():
     if  session.status_id <> idstatus:
         session.status_id  = idstatus
         redirect(URL('index'))
+
+    erwins.nome.width                 = '30%'
+    erwins.nome.maxlength             = 8
+    erwins.nome.uppercase             = True
+    erwins.nome.requires              = IS_NOT_EMPTY()
+    if  widgets:
+        erwins.nome.widget            = widgets.text
+    erwins.arquivo.requires           = IS_NOT_EMPTY()
+    erwins.lookups                    = {'status': ['statuserwin',  ['descricao']], \
+                                         'usuarioConfirmacao': ['auth_user', ['first_name','last_name']]}
+
     form = SQLFORM(erwins, iderwin, deletable=True,
                                       hidden=dict(codigoAplicacao=idaplicacao))
     if  not iderwin:
@@ -157,7 +168,7 @@ def index():
                                  buttonClear=True,
                                  buttonProcess=False,
                                  buttonSelectProguess=buttonSelectProguess,
-                                 buttonSubmit=True))
+                                 buttonSubmit=True if idaplicacao and idstatus else False))
 
 @auth.requires_login()
 def importar():
@@ -295,3 +306,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

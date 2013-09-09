@@ -26,7 +26,7 @@ class Colunas:
         gravados   = 0
         dicCols = {}
         dicPre ={'C':u'CD', 'D':u'DT', 'R':u'DS', 'E':u'EN', 'H':u'HR', 'M':u'MD',
-                 'B':u'MM', 'I':u'NM', 'N':u'NU', 'P':u'PC', 'T':u'PZ', 'Q':u'QT',
+                 'B':u'MM', 'I':u'NM', 'N':u'NU', 'P':u'PC', 'T':u'PR', 'Q':u'QT',
                  'U':u'UN', 'V':u'VR', 'W':u'WK', 'CD':u'Código ', 'DS':u'Descrição ',
                  'DT':u'Data ', 'EN':u'Endereço ', 'HR':u'Hora ', 'ID':u'Identificador',
                  'NM':u'Nome ', 'NU':u'Número ', 'MD':u'Medida ', 'MM':u'Multimídia ',
@@ -37,7 +37,9 @@ class Colunas:
 
         for lisCols in self.model.getColunas(''):
             lidos += 1
-            columnname         = lisCols['Physical_Name'].upper()
+            columnname = lisCols['Physical_Name'].upper()
+            if  columnname == '%DOMAINNAME':
+                columnname = lisCols['User_Formatted_Name'].upper()
             attributename      = lisCols['Name']
             descricao          = lisCols['Definition']
             if  not descricao:
@@ -55,12 +57,14 @@ class Colunas:
 
 #  Trata atributo
             attr = dicCols[k]['attributename']
+            if  attr == k:
+                attr = ''
             if not attr:
                 attr=dicPre[k[:1]] if k[:1] in dicPre else 'WK'
                 attt=k[1:].replace('_',' ')
                 for word in utl.words(attt)[1]:
-                    if word in dicabrev:
-                        attr=attr+dicabrev[word][0].capitalize()
+                    if word.upper() in dicabrev:
+                        attr=attr+dicabrev[word.upper()][0].capitalize()
                     else:
                         attr=attr+word.capitalize()
             nAttr=dicPre[attr[0:2].upper()]
@@ -151,3 +155,5 @@ class Colunas:
                     % self.cAppl]
         return [1, query]
 
+
+# vim: ft=python

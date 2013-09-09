@@ -30,6 +30,7 @@ def index():
     form.vars.usuarioConfirmacao   = auth.user.id
     form.vars.dataConfirmacao      = datetime.datetime.today()
     if  form.accepts(request.vars, session):
+        db(db.checkListPrototipo.codigoAplicacao==idaplicacao).update(model = False)
         if  request.vars.has_key('delete_this_record') and \
             request.vars.delete_this_record == 'on':
             session.flash = 'Coluna Entidade Referenciada Excluida'
@@ -70,8 +71,9 @@ def index():
                                         name='codigoEntidade',
                                         table='entidades',
                                         fields=['id','nomeFisico'],
-                                        masks=[[],\
-                                        ['nomeExterno','nomeFisico']],
+                                        masks=[[],['nomeExterno','nomeFisico']],
+                                        filtro=db['entidades'].codigoAplicacao==idaplicacao,
+                                        orderby='nomeExterno',
                                         value=session.entidade_id or 0)),
                                   '<br/>Entidade Referenciada:',
                                   str(utl.Select(db,
@@ -98,14 +100,14 @@ def index():
                                   noLookups=['codigoColuna'],
                                   noCheckFields=['confirmado'],
                                   keysCheckFields=['Consulta','Lista'],
-                                  checkFields={'Consulta': [['Saida', 
+                                  checkFields={'Consulta': [['Saida',
                                                              'consultaSaida']],
-                                               'Lista':    [['Saida', 
+                                               'Lista':    [['Saida',
                                                              'listaSaida']]},
                                   search=['codigoColuna'],
                                   optionDelete=True,
                                   buttonClear=True,
-                                  buttonSubmit=True))
+                                  buttonSubmit=True if idaplicacao and identidade and identidadeReferenciada else False))
 
 @auth.requires_login()
 def orderby():
@@ -147,3 +149,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

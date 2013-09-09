@@ -76,7 +76,7 @@ def index():
                 search=['jobName', 'jobRotine', 'jobPrograma'],
                 optionDelete=True,
                 buttonClear=True,
-                buttonSubmit=True,
+                buttonSubmit=True if idaplicacao else False,
                 buttons=buttons,
                 popups=popups))
 
@@ -166,3 +166,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

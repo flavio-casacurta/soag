@@ -1981,3 +1981,240 @@ def gerarJob(db, idjob, user):
     return {'retorno': True, 'flash': flash, \
                              'labelErrors': labelErrors, \
                               'msgsErrors': msgsErrors}
+
+def referback(db, idaplicacao, idstep, idcontroller, idobjeto):
+    regstp = db(db.jobsteps.id==idstep).select().first()
+    if  regstp.objeto == 'HPU':
+        nome1 = 'nome1'
+        nome2 = 'nome2'
+        nome3 = 'nome3'
+    elif  regstp.objeto == 'Programa':
+        nome1 = 'nome2'
+        nome2 = 'nome3'
+        nome3 = 'nome4'
+    elif  regstp.objeto == 'Programa (CKRS)':
+        nome1 = 'nome2'
+        nome2 = 'nome3'
+        nome3 = 'nome4'
+    elif  regstp.objeto == 'Sort Tabela':
+        nome1 = 'nome2'
+        nome2 = 'nome3'
+        nome3 = 'nome4'
+    else:
+        nome1 = 'nome1'
+        nome2 = 'nome2'
+        nome3 = 'nome3'
+    regsteps = db(db.jobsteps).select(orderby='job,step,sequencia')
+    items    = ''
+    rotina   = ''
+    job      = 0
+    step     = ''
+    ocor     = 0
+    qtde     = len(regsteps)
+    for regstep in regsteps:
+        ocor  += 1
+        regjob = db(db.jobs.id==regstep.job).select().first()
+        if  regjob.codigoAplicacao <> idaplicacao:
+            continue
+        if  regstep.job == int(session.idjob or 0) and (regstep.step == session.get('step', '') or regstep.sequencia > int(session.sequencia or 0)):
+            continue
+        if  regjob.rotine <> rotina:
+            items += ('</ul></ul></ul><ul>' if items else '<ul>') + '<li>Rotina: %s</li>' % regjob.rotine
+            rotina = regjob.rotine
+            items += '<ul><li>Job: %s</li>' % regjob.name
+            job    = regstep.job
+            items += '<ul><li>%s - %s %s</li>' % (regstep.step, regstep.objeto, regstep.dsObjeto)
+            step   = regstep.step
+        else:
+            if  regstep.job <> job:
+                items += ('</ul><ul>' if items else '<ul>') + '<li>Job: %s</li>' % regjob.name
+                job    = regstep.job
+                items += '<ul><li>%s - %s %s</li>' % (regstep.step, regstep.objeto, regstep.dsObjeto)
+                step   = regstep.step
+            else:
+                if  regstep.step <> step:
+                    items += '%s<ul><li>%s - %s %s</li>' % ('<ul>' if ocor==qtde else '', regstep.step, regstep.objeto, regstep.dsObjeto)
+                    step   = regstep.step
+        if  regstep.objeto == 'HPU':
+            reghpu = db(db.hpus.id==regstep.idObjeto).select().first()
+            if  not reghpu:
+                items += '<ul><li>Nenhuma saida definida</li></ul>'
+            else:
+                regent = db(db.tabelas.id==reghpu.codigoEntidade).select().first()
+                items += '<ul>'
+                dsname = 'SYSREC01 - AD.C87.%s.%s' % (regjob.rotine + 'S%s.HPU.SYSREC01' % regstep.sequencia, regent.nome)
+                if  regstep.job == int(session.idjob or 0):
+                    vlr1 = '*'
+                    vlr2 = step
+                    vlr3 = 'SYSREC01'
+                    vlr4 = ''
+                else:
+                    vlr1 = regjob.rotine + 'S%s' % '{:>02}'.format(regstep.sequencia)
+                    vlr2 = 'SYSREC01'
+                    vlr3 = regent.nome
+                    vlr4 = ''
+                items += '<li>' + str(A(dsname, _style=XML('cursor: pointer'),
+                           _onclick=XML("jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome1, vlr1) +
+                                 "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome2, vlr2) +
+                           "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome3, vlr3) +
+                             ("jQuery('#%s_nome4').attr('value','%s');" %
+                                                     (idcontroller, vlr4)
+                           if  regstp.objeto == 'Sort Arquivo' else '') +
+                           "jQuery('#referback_%s').text('');" % idobjeto)))
+            items += '</li>'
+            items += '</ul>'
+        if  regstep.objeto == 'Programa':
+            regnens  = db(db.prognens.id==regstep.idObjeto).select().first()
+            if  not regnens:
+                items += '<ul><li>Nenhuma saida definida</li></ul>'
+            else:
+                idx       = 0
+                regnens4s = db(db.prognens4.prognens==regnens.id).select()
+                for regnens4 in regnens4s:
+                    idx   += 1
+                    items += '<ul>'
+                    dsname = '%s - AD.C87.%s%s%s%s' % \
+                          (regnens4.nome1, regjob.rotine + 'S%s' % '{:>02}'.format(regstep.sequencia),
+                          ('.' + regnens4.nome3) if regnens4.nome3 else '',
+                          ('.' + regnens4.nome4) if regnens4.nome4 else '',
+                          ('.' + regnens4.nome5) if regnens4.nome5 else '')
+                    if  regstep.job == int(session.idjob or 0):
+                        vlr1 = '*'
+                        vlr2 = step
+                        vlr3 = regnens4.nome1
+                        vlr4 = ''
+                    else:
+                        vlr1 = regjob.rotine + 'S%s' % '{:>02}'.format(regstep.sequencia)
+                        vlr2 = (regnens4.nome3) if regnens4.nome3 else ''
+                        vlr3 = (regnens4.nome4) if regnens4.nome4 else ''
+                        vlr4 = (regnens4.nome5) if regnens4.nome5 else ''
+                    items += '<li>' + str(A(dsname, _style=XML('cursor: pointer'),\
+                    _onclick=XML("jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome1, vlr1) +
+                                 "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome2, vlr2) +
+                                 "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome3, vlr3) +
+                             ("jQuery('#%s_nome4').attr('value','%s');" %
+                                                     (idcontroller, vlr4)
+                           if  regstp.objeto == 'Sort Arquivo' else '') +
+                          "jQuery('#referback_%s').text('');" % idobjeto)))
+                    items += '</li>'
+                    items += '</ul>'
+                if  not idx:
+                    items += '<ul><li>Nenhuma Saida definida</li></ul>'
+        if  regstep.objeto == 'Programa (CKRS)':
+            regckrs  = db(db.progckrs.id==regstep.idObjeto).select().first()
+            if  not regckrs:
+                items += '<ul><li>Nenhuma saida definida</li></ul>'
+            else:
+                idx       = 0
+                regckrs4s = db(db.progckrs4.progckrs==regckrs.id).select()
+                for regckrs4 in regckrs4s:
+                    idx   += 1
+                    items += '<ul>'
+                    dsname = '%s - AD.C87.%s%s%s%s' % \
+                          (regnens4.nome1, regjob.rotine + 'S%s' % '{:>02}'.format(regstep.sequencia),
+                          ('.' + regckrs4.nome3) if regckrs4.nome3 else '',
+                          ('.' + regckrs4.nome4) if regckrs4.nome4 else '',
+                          ('.' + regckrs4.nome5) if regckrs4.nome5 else '')
+                    if  regstep.job == int(session.idjob or 0):
+                        vlr1 = '*'
+                        vlr2 = step
+                        vlr3 = regckrs4.nome1
+                        vlr4 = ''
+                    else:
+                        vlr1 = regjob.rotine + 'S%s' % '{:>02}'.format(regstep.sequencia)
+                        vlr2 = (regckrs4.nome3) if regckrs4.nome3 else ''
+                        vlr3 = (regckrs4.nome4) if regckrs4.nome4 else ''
+                        vlr4 = (regckrs4.nome5) if regckrs4.nome5 else ''
+                    items += '<li>' + str(A(dsname, _style=XML('cursor: pointer'),
+                    _onclick=XML("jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome1, vlr1) +
+                                 "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome2, vlr2) +
+                                 "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome3, vlr3) +
+                             ("jQuery('#%s_nome4').attr('value','%s');" %
+                                                     (idcontroller, vlr4)
+                           if  regstp.objeto == 'Sort Arquivo' else '') +
+                          "jQuery('#referback_%s').text('');" % idobjeto)))
+                    items += '</li>'
+                    items += '</ul>'
+                if  not idx:
+                    items += '<ul><li>Nenhuma Saida definida</li>'
+        if  regstep.objeto == 'Sort Tabela':
+            reg1s  = db(db.sort1s.id==regstep.idObjeto).select().first()
+            if  not reg1s:
+                items += '<ul><li>Nenhuma saida definida</li></ul>'
+            else:
+                regent = db(db.tabelas.id==reg1s.codigoEntidade).select().first()
+                items += '<ul>'
+                dsname = 'SORTOUT - AD.C87.%s%s%s' % (regjob.rotine + 'S%s.SORT' % '{:>02}'.format(regstep.sequencia), '.' + regent.nome, '.' + reg1s.jobArqName)
+                if  regstep.job == int(session.idjob or 0):
+                    vlr1 = '*'
+                    vlr2 = step
+                    vlr3 = 'SORTOUT'
+                    vlr4 = ''
+                else:
+                    vlr1 = regjob.rotine
+                    vlr2 = 'S%s.SORT' % '{:>02}'.format(regstep.sequencia)
+                    vlr3 = regent.nome
+                    vlr4 = reg1s.jobArqName
+                items += '<li>' + str(A(dsname, _style=XML('cursor: pointer'),
+                    _onclick=XML("jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome1, vlr1) +
+                                 "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome2, vlr2) +
+                                 "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome3, vlr3) +
+                             ("jQuery('#%s_nome4').attr('value','%s');" %
+                                                     (idcontroller, vlr4)
+                           if  regstp.objeto == 'Sort Arquivo' else '') +
+                          "jQuery('#referback_%s').text('');" % idobjeto)))
+            items += '</li>'
+            items += '</ul>'
+        if  regstep.objeto == 'Sort Arquivo':
+            regnens  = db(db.sortnens.id==regstep.idObjeto).select().first()
+            if  not regnens:
+                items += '<ul><li>Nenhuma saida definida</li></ul>'
+            else:
+                regnens4s = db(db.sortnens4.sortnens==regnens.id).select()
+                idx       = 0
+                for regnens4 in regnens4s:
+                    idx   += 1
+                    items += '<ul>'
+                    origem = 'SYSOUT%s' % '{:>02}'.format(idx)
+                    dsname = 'SYSOUT%s - AD.C87.%s%s%s' % ('{:>02}'.format(idx), regjob.rotine + 'S%s.SORT' % '{:>02}'.format(regstep.sequencia), '.' + regnens4.nome1, ('.' + regnens4.nome2) if regnens4.nome2 else '')
+                    if  regstep.job == int(session.idjob or 0):
+                        vlr1 = '*'
+                        vlr2 = step
+                        vlr3 = origem
+                        vlr4 = ''
+                    else:
+                        vlr1 = regjob.rotine + 'S%s' % '{:>02}'.format(regstep.sequencia)
+                        vlr2 = 'SORT'
+                        vlr3 = regnens4.nome1
+                        vlr4 = (regnens4.nome2) if regnens4.nome2 else ''
+                    items += '<li>' + str(A(dsname, _style=XML('cursor: pointer'),
+                    _onclick=XML("jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome1, vlr1) +
+                                 "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome2, vlr2) +
+                                 "jQuery('#%s_%s').attr('value','%s');" %
+                                            (idcontroller, nome3, vlr3) +
+                             ("jQuery('#%s_nome4').attr('value','%s');" %
+                                                     (idcontroller, vlr4)
+                           if  regstp.objeto == 'Sort Arquivo' else '') +
+                          "jQuery('#referback_%s').text('');" % idobjeto)))
+                    items += '</li>'
+                    items += '</ul>'
+                if  not idx:
+                    items += '<ul><li>Nenhuma Saida definida</li></ul>'
+        items += '</ul>'
+    return XML(items)
+
+# vim: ft=python

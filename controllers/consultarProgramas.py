@@ -95,6 +95,7 @@ def index():
                                        masks=[[],['nomeExterno','nomeFisico']],
                                        filtro=db['entidades'].\
                                                  codigoAplicacao==idaplicacao,
+                                       orderby='nomeExterno',
                                        todos='Todas Entidades',
                                        value=session.identidade)),
                                        utl.buttonsDownload(popups)],

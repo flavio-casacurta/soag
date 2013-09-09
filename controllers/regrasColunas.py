@@ -15,6 +15,10 @@ def index():
         session.aplicacao_id  = idaplicacao
         redirect(URL('index'))
     else:
+        if  request.vars:
+            if  str(request.vars.codigoColuna).strip() == '0':
+                session.flash = 'Coluna deve ser preenchida'
+                redirect(URL('index'))
         if  not idregrasColuna:
             if  request.vars:
                 regra=db(db[regras].id==request.vars.codigoRegra).\
@@ -41,9 +45,12 @@ def index():
                             else False, \
                         hidden=dict(codigoAplicacao=idaplicacao))
         form.vars.codigoRegra        = request.vars.codigoRegra
+        form.vars.codigoColuna       = request.vars.codigoColuna
         form.vars.usuarioConfirmacao = auth.user.id
         form.vars.dataConfirmacao    = datetime.datetime.today()
         if  form.accepts(request.vars, session):
+            db(db.checkListPrototipo.codigoAplicacao==idaplicacao).update( model = False
+                                                                         , controllers = False)
             if  request.vars.has_key('delete_this_record') and \
                 request.vars.delete_this_record == 'on':
                 session.flash = 'Regra Coluna Excluida'
@@ -93,7 +100,7 @@ def index():
                                      or  auth.has_membership(2, auth.user.id, \
                                          'Super-Usuario')) \
                                      else False,
-                    buttonSubmit=True))
+                    buttonSubmit=True if idaplicacao else False))
 
 @auth.requires_login()
 def orderby():
@@ -132,3 +139,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

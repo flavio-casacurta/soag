@@ -1,6 +1,7 @@
 # coding: utf8
 
 from gluon.contrib.pyfpdf import FPDF
+import jobs
 
 @auth.requires_login()
 def index():
@@ -71,8 +72,7 @@ def search():
 
 @auth.requires_login()
 def referback():
-    return listdetail.referback(session.get('aplicacao_id', 0), \
-                                session.get('idstep', 0), 'progckrs3', 'nome2')
+    return jobs.referback(db, session.get('aplicacao_id', 0), session.get('idstep', 0), 'progckrs3', 'nome2')
 
 @auth.requires_login()
 def report():
@@ -95,3 +95,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

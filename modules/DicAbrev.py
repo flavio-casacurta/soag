@@ -19,3 +19,5 @@ class DicAbrev(object):
        except:
            return [0, 'Ocorreu um erro no Select da Tabela DicAbrev.', sys.exc_info()[1]]
        return self.dicAbrev
+
+# vim: ft=python

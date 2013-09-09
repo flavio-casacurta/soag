@@ -1,5 +1,5 @@
       *----------------------------------------------------------------*
-       @LABEL-MOVE-@DCLGEN-TO-@APPLIDW@SIGLAPGMC     SECTION
+       @LABEL-MOVE-@DCLGEN-TO-@APPLIDW@SIGLAPGMC     SECTION.
       *----------------------------------------------------------------*
            MOVE '@LABEL-MOVE-@DCLGEN-TO-@APPLIDW@SIGLAPGMC' TO WRK-PARAGRAFO.
 

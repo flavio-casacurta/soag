@@ -144,7 +144,6 @@
       *----------------------------------------------------------------*
            MOVE '2200-ALIMENTAR-PERSISTENCIA' TO WRK-PARAGRAFO.
            MOVE @APPLIDW@SIGLAPGMI-REGISTRO TO @APPLIDW@SIGLAPGMC-REGISTRO.
-@GLOG
       *----------------------------------------------------------------*
        2200-99-EXIT. EXIT.
       *----------------------------------------------------------------*

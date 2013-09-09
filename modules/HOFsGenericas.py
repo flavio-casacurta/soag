@@ -23,7 +23,7 @@ ident = lambda x: x
 wordsRe = re.compile(r'\w+', re.UNICODE)
 words = lambda line: [len(wordsRe.findall(line)), wordsRe.findall(line)]
 word = lambda line, arg: wordsRe.findall(line)[arg-1 if arg > 0 else 0] if arg <= words(line) else ''
-pos = lambda arg, line: line.find(arg) if line.find(arg) > 0 else 0
+pos = lambda arg, line: line.find(arg)+1 if line.find(arg) >= 0 else 0
 nextWord = lambda arg, line: word(line[pos(arg,line):],2) if pos(arg,line) > 0 else ''
 isRem = lambda line: True if re.match(r'^.{6}\*', line, re.UNICODE) else False
 isNotRem = lambda line: not isRem(line)
@@ -31,3 +31,4 @@ sanitize = lambda line: ' '.join(line.split())
 isStartswith = lambda line, arg: line.strip().startswith(arg)
 isBlank = lambda line: not line.strip()
 isNotBlank = lambda line: not isBlank(line)
+Capitalize = lambda s, n=2:' '.join(a.capitalize() if len(a) > n else a.lower() for a in s.split())

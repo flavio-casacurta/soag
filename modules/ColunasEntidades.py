@@ -38,7 +38,8 @@ class ColunasEntidades:
             if  nomeFisicoEntidadeA != nomeFisicoEntidade:
                 returnEntidade       = self.entidades.selectEntidadesByNomeFisico(nomeFisicoEntidade)
                 if  not returnEntidade[0]:
-                    return [0,"CE - CodigoEntidade de %s nao encontrado na Tabela Entidades." % (nomeFisicoEntidade)]
+                    print "CE - CodigoEntidade de %s nao encontrado na Tabela Entidades." % (nomeFisicoEntidade)
+                    continue
                 entidade             = returnEntidade[1][0]
                 nomeFisicoEntidadeA  = nomeFisicoEntidade
                 entCols              = self.model.getEntidadeColunas(nomeFisicoEntidade)
@@ -48,7 +49,8 @@ class ColunasEntidades:
                     ehNotNull  = False if lisCols['null'] else True
                     returnCodigoColuna = self.coluna.selectColunasByColumnName(columnName)
                     if  not returnCodigoColuna[0]:
-                        return [0,"CE - CodigoColuna de %s nao encontrado na Tabela Colunas." % (columnName)]
+                        print "CE - CodigoColuna de %s nao encontrado na Tabela Colunas." % (columnName)
+                        continue
                     coluna     = returnCodigoColuna[1][0]
                     try:
                         self.colunasEntidades.insert(codigoAplicacao = self.cAppl

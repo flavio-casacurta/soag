@@ -1,7 +1,7 @@
 # coding: utf8
 
 from   gluon.contrib.pyfpdf import FPDF
-import sql
+from sqlhpu import Sql
 
 @auth.requires_login()
 def index():
@@ -16,11 +16,11 @@ def index():
     if  idsysin:
         regsysin = db(db.sysin.id==idsysin).select().first()
         if  not regsysin.sql:
-            sqL = sql.Sql()
+            sqL = Sql()
             form.vars.sql = request.vars.sql = \
                                   sqL.getTableSelect(db, reghpu.codigoEntidade)
     else:
-        sqL = sql.Sql()
+        sqL = Sql()
         form.vars.sql = request.vars.sql = \
                                   sqL.getTableSelect(db, reghpu.codigoEntidade)
 

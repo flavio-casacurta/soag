@@ -1,7 +1,7 @@
 # coding: cp1252
 
 from   gluon.contrib.pyfpdf import FPDF
-from   Gerpro               import *
+from   Gerserv              import *
 import utilities as utl
 import datetime
 
@@ -34,6 +34,7 @@ def index():
         form.vars.usuarioConfirmacao = auth.user.id
         form.vars.dataConfirmacao    = datetime.datetime.today()
         if  form.accepts(request.vars, session):
+            db(db.checkListPrototipo.codigoAplicacao==idaplicacao).update(mensagens = False)
             if  request.vars.has_key('delete_this_record') and \
                 request.vars.delete_this_record == 'on':
                 session.flash = 'Entidade Excluida'
@@ -72,6 +73,7 @@ def index():
                   'entidades', entidades,
                   query,
                   form, fields=['id','nomeExterno','nomeFisico','nomeAmigavel'],
+                  orderBy=['nomeExterno','ASC'],
                   scroll=['5%','15%','20%','60%'],
                   noDetail=['codigoAplicacao'],
                   keysCheckFields=['Coordenadores','Servicos'],
@@ -110,7 +112,7 @@ def index():
                              auth.has_membership(2, auth.user.id, \
                              'Super-Usuario')) \
                         else False,
-                  buttonSubmit=True,
+                  buttonSubmit=True if idaplicacao else False,
                   buttons=buttons,
                   popups=popups))
 
@@ -182,11 +184,11 @@ def servicos():
 #    entidade   = db(db[entidades].id==identidade).select()[0]
     userName   ='%s %s' % (auth.user.first_name, auth.user.last_name)
 
-    soag      = Gerpro(db, sessionId = auth.user.id
-                       , cAppl        = session.get('aplicacao_id',0)
-                       , userName     = userName)
+    soag = Gerserv(db, sessionId = auth.user.id
+                     , cAppl        = session.get('aplicacao_id',0)
+                     , userName     = userName)
 
-    gerpro     = soag.gerpro(identidade)
+    gerpro = soag.gerserv(identidade)
 
     if  gerpro[0]:
         session.flash = 'Servicos gerados com sucesso (RC: 0).'
@@ -218,3 +220,5 @@ def zipFile():
     db(db[entidades].id==identidade).update(logGeracao=\
             'Download efetuado em %s' % str(datetime.datetime.today())[:19])
     return listdetail.download(request, response, filedir, filename)
+
+# vim: ft=python

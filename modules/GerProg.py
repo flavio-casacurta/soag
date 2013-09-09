@@ -79,6 +79,12 @@ class GerProg:
         self.persistencia( properties, lisBookE, lisBookI, lisBookS, lisBookR, dicRegras, dicModulos, dicCol
                          , dicProg, lisCol, pks, path)
 
+        nameProg = '{}1{}{}'.format(properties['APPLID'], properties['SIGLAPGM'], properties['TYPEPGM'])
+
+        log = open(properties['LOG'], 'a')
+        log.write('Gerserv - Programas e Books do modulo: {} - gerados OK\n'.format(nameProg))
+        log.close()
+
     def coordenador(self, properties, lisBookE, lisBookI, lisBookS, lisBookR
                         , dicRegras, dicModulos, dicCol, dicProg, path):
         applId = properties['APPLID']
@@ -150,7 +156,6 @@ class GerProg:
             gravarDadosSaida = change(dic, gds)
 
         dic = {'@ALIMENTARFUNCIONAL\n':alimentarFuncional
-              ,'@GLOG\n'              :''
               ,'@REMBOOKSAIDA\n'      :rembookSaida
               ,'@AREADESAIDA\n'       :areaDeSaida
               ,'@GRAVARDADOSSAIDA\n'  :gravarDadosSaida
@@ -272,8 +277,7 @@ class GerProg:
             moduloCALE = open(os.path.join(self.tmplt,'moduloCALE.cbl')).read()
             modulosFuncionais += change(dic, moduloCALE)
 
-        dic = {'@GLOG\n'              :''
-              ,'@REMBOOKARQUITETUR\n' :remBookArquitetur
+        dic = {'@REMBOOKARQUITETUR\n' :remBookArquitetur
               ,'@REMBOOKFUNCIONAIS\n' :remBookFuncionais
               ,'@REMMODLFUNCIONAIS\n' :remModlFuncionais
               ,'@WORKINGFUNCIONAIS\n' :workingFuncionais
@@ -343,7 +347,7 @@ class GerProg:
                     colcbl = pk[0].replace('_', '-')
                     movetobooks += moveDclToBook(pk[0], qlf, bookC, esifO, spi, pt)
                     movetobooks += '\n'
-            if  pkI:
+            if  pkI and dicCol[pk[0]].datatypes.descricao != 'TIMESTAMP':
                 pksProcessadas = [pk[0] for pk in pks]
                 wheredclgen += '{:11}END-EXEC.\n'.format('')
                 dic = {'@PKSDCLGEN\n'  :pksdclgen

@@ -106,6 +106,7 @@ def extra():
                         name='entidade_id',
                         table='entidades',
                         fields=['id','nomeAmigavel'],
+                        filtro=db['entidades'].codigoAplicacao==session.aplicacao_id,
                         value=session.entidade_id or 1,
                         width='32%',
                         submit=False))

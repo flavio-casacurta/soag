@@ -23,7 +23,7 @@ def index():
     except:
         pickef = None
     model = modelo.Erwin()
-    le    = model.load(picke=pickef)
+    le    = model.load(picke=pickef, all=False)
     if  not le['retorno']:
         session.flash = le['flash']
         session.labelErrors = le['labelErrors']
@@ -32,33 +32,28 @@ def index():
         pickef  = None
     else:
         ents    = model.getEntityPhysical()
-        db.erwins.nomeExterno1.requires = \
-                                        IS_IN_SET(ents, zero='-- Selecione --')
+        db.erwins.nomeExterno1.requires = IS_IN_SET(ents, zero='-- Selecione --')
         db.erwins.default1.requires     = IS_NOT_EMPTY()
         db.erwins.nomeExterno2.requires = IS_NOT_EMPTY()
-        db.erwins.nomeExterno3.requires = \
-                                        IS_IN_SET(ents, zero='-- Selecione --')
-        db.erwins.default3.requires     = IS_IN_SET(['Sequencial 1 em 1'],
-                                                        zero='-- Selecione --')
+        db.erwins.nomeExterno3.requires = IS_IN_SET(ents, zero='-- Selecione --')
+        db.erwins.default3.requires     = IS_IN_SET(['Sequencial 1 em 1'], zero='-- Selecione --')
         form = SQLFORM(db.erwins, iderwin, deletable=False)
         if  request.vars:
-            form.vars.codigoAplicacao = request.vars.codigoAplicacao = \
-                                                     erwin.codigoAplicacao
+            form.vars.codigoAplicacao = request.vars.codigoAplicacao = erwin.codigoAplicacao
             form.vars.nome = request.vars.nome = erwin.nome
             form.vars.status = request.vars.status = erwin.status
         if  form.accepts(request.vars, session):
             db(db.erwins.id == iderwin).update(status=4,
-                                             mensagem='Pendente Processamento',
+                                               mensagem='Pendente Processamento',
                                                usuarioConfirmacao=auth.user.id,
-                                     dataConfirmacao=datetime.datetime.today())
+                                               dataConfirmacao=datetime.datetime.today())
             session.status_id = 4
             session.flash = 'Padroes Alterados'
             redirect(URL('index', args=(iderwin)))
         erwin = db(db.erwins.id == iderwin).select().first()
         if  erwin.nomeExterno1 and erwin.default1 and erwin.nomeExterno2 and \
             erwin.nomeExterno3 and erwin.default3:
-            buttons = [
-                      ['Validar Padroes', 'validar', '70', '390','530', '600']]
+            buttons = [['Validar Padroes', 'validar', '90', '150','490', '1100']]
         else:
             buttons = []
     if  session.get('flash', None):
@@ -124,48 +119,68 @@ def validar():
         if  pickef:
             erwin  = db(db.erwins.id == iderwin).select().first()
             model  = modelo.Erwin()
-            le     = model.load(picke=pickef)
+            le     = model.load(picke=pickef, all=False)
             if  not le['retorno']:
                 session.flash = le['flash']
                 session.labelErrors = le['labelErrors']
                 session.msgsErrors = le['msgsErrors']
                 redirect(URL('index', args=(iderwin)))
             ents   = model.getEntidades('')
-            maxseq = model.getMaxSequencia(erwin.nomeExterno3)
+            dicOk  = {}
+            lisDup = []
+            lisSn2 = []
             for ent in ents:
+                entidade = ent['User_Formatted_Physical_Name'].upper()
+
                 regto = db((db.erwinents.erwin == iderwin) &
-                           (db.erwinents.entidade == ent['Physical_Name'])).\
-                               select().first()
-                nomeExterno1 = \
-                             ent['Entity.Physical.%s' % erwin.nomeExterno1] + \
-                                                        erwin.nomeExterno2  + \
-                             ent['Entity.Physical.%s' % erwin.nomeExterno3]
-                if  (regto) and (len((regto.nomeExterno2 or '')) == 8 and \
-                                      regto.nomeExterno2.find('???') < 0):
-                    nomeExterno2 = regto.nomeExterno2
-                else:
-                    if  ent['Entity.Physical.%s' % erwin.nomeExterno1]:
-                        nomeExterno2 = \
-                            ent['Entity.Physical.%s' % erwin.nomeExterno1]
-                    else:
-                        nomeExterno2 = erwin.default1
-                    nomeExterno2 += erwin.nomeExterno2
-                    if  len(ent['Entity.Physical.%s' % \
-                                             erwin.nomeExterno3].strip()):
-                        nomeExterno2 += \
-                            ent['Entity.Physical.%s' % erwin.nomeExterno3]
-                    else:
-                        nomeExterno2 += '{:>003}'.format(maxseq)
-                        maxseq += 1
+                           (db.erwinents.entidade == entidade)).select().first()
                 if  regto:
-                    db(db.erwinents.id == regto.id).\
-                             update(nomeExterno1=nomeExterno1,
-                                    nomeExterno2=nomeExterno2)
+                    dicOk[regto.nomeExterno1] = entidade
+                    continue
+
+                ne1 = ent['Entity.Physical.%s' % erwin.nomeExterno1]
+                if  ne1 != erwin.default1:
+                    continue
+
+                ne2 = erwin.nomeExterno2
+                ne3 = ent['Entity.Physical.%s' % erwin.nomeExterno3]
+
+                nomeExterno1 = ne1 + ne2 + ne3
+
+                nomeExterno1 = nomeExterno1.upper()
+                nomeExterno2 = ''
+                obs = ''
+
+                if  ne1:
+                    if  ne3.strip():
+                        nomeExterno2 = nomeExterno1
+#                    else:
+
+                if  nomeExterno2:
+                    if  nomeExterno1 in dicOk.keys():
+                        obs = '{} ja definido para a entidade {}'.format(nomeExterno1, dicOk[nomeExterno1])
+                        nomeExterno2 = ''
+                        lisDup.append(entidade)
+                    else:
+                        dicOk[nomeExterno1] = entidade
                 else:
-                    db(db.erwinents.insert(erwin=iderwin,
-                                           entidade=ent['Physical_Name'],
-                                           nomeExterno1=nomeExterno1,
-                                           nomeExterno2=nomeExterno2))
+                    lisSn2.append(entidade)
+                    obs = 'Default Assumido'
+
+                db(db.erwinents.insert(erwin=iderwin
+                                      ,entidade=entidade
+                                      ,nomeExterno1=nomeExterno1
+                                      ,nomeExterno2=nomeExterno2
+                                      ,obs=obs))
+
+            ne1 = erwin.default1
+            ne2 = erwin.nomeExterno2
+            ents = lisDup + lisSn2
+            maxseq = model.getMaxSequencia(db, iderwin, ne1+ne2, 'nomeExterno1')
+            for ent in ents:
+                nomeExterno2 = ne1 + ne2 + maxseq
+                maxseq = model.addSequencia(nomeExterno2)
+                db(db.erwinents.entidade==ent).update(nomeExterno2=nomeExterno2)
         redirect('../validarpadraoerwin/index')
     else:
         redirect(URL('index'))
@@ -191,3 +206,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

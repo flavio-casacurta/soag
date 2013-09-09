@@ -17,6 +17,7 @@ dicVal = {'X'        :'SPACES'
          ,'CHAR'     : "' '"
          ,'DATE'     : "'00.00.00'"
          ,'DECIMAL'  : '0'
+         ,'NUMERIC'  : '0'
          ,'INTEGER'  : '0'
          ,'TIME'     : "'00:00:00'"
          ,'TIMESTAMP': "'0001-01-01-01.01.01.000001'"
@@ -24,6 +25,7 @@ dicVal = {'X'        :'SPACES'
 
 dicCv  = {'X1':' EQUAL TO LOW-VALUES'
          ,'X2':' EQUAL TO HIGH-VALUES'
+         ,'X3':' EQUAL TO SPACES'
          ,'91':' IS NOT NUMERIC'}
 
 dicOc  = {1:'>='
@@ -141,7 +143,7 @@ def saidaBook(remBook, book):
 def inclOccurs(properties, remBook, book, level, esif, sufBook):
     occurs = False
     if  sufBook in 'I C S':
-        book += itemGroup(level, '{}'.format(properties['ENTIDADE'][:18].replace('_','-')), esif)
+        book += itemGroup(level, '{}'.format(properties['ENTIDADE'][:18].replace(' ','-')), esif)
         level +=2
         book += itemGroup(level, 'OCCURS')
         level +=2
@@ -275,6 +277,7 @@ def regraPR(regra, regras, field, col, bookI, esifO, errLoc, cale):
     cd = '{:11}IF  {}-{}{} {}\n'.format('', bookI, esifO, field.replace('_','-'), dicCv[natur+'1'])
     if  natur == 'X':
         cd +='{:12}OR {}-{}{} {}\n'.format('', bookI, esifO, field.replace('_','-'), dicCv[natur+'2'])
+        cd +='{:12}OR {}-{}{} {}\n'.format('', bookI, esifO, field.replace('_','-'), dicCv[natur+'3'])
     cd += messageError(errLoc, regras[regra]['message'])
     return cd
 
@@ -310,7 +313,7 @@ def regraDT(regra, regras, field, col, bookI, esifO, errLoc, cale):
     esifO = esifO + '-' if esifO else ''
     cd  = '{:11}MOVE 6 TO CALEWAAC-FMT-ARGMTO.\n'.format('')
     cd += '{:11}MOVE {}-{}{} TO CALEWAAC-VLR-ARGMTO\n'.format('', bookI, esifO, field.replace('_','-'))
-    cd += '{:11}PERFORM 2800-CHAMAR-CALE1000.\n'.format('')
+    cd += '{:11}PERFORM 2800-CHAMAR-CALE1000.\n\n'.format('')
     cale.TrueCale()
     return cd
 
@@ -319,7 +322,7 @@ def regraTM(regra, regras, field, col, bookI, esifO, errLoc, cale):
     esifO = esifO + '-' if esifO else ''
     cd  = '{:11}MOVE 33 TO CALEWAAC-FMT-ARGMTO.\n'.format('')
     cd += '{:11}MOVE {}-{}{} TO CALEWAAC-VLR-ARGMTO\n'.format('', bookI, esifO, field.replace('_','-'))
-    cd += '{:11}PERFORM 2800-CHAMAR-CALE1000.\n'.format('')
+    cd += '{:11}PERFORM 2800-CHAMAR-CALE1000.\n\n'.format('')
     cale.TrueCale()
     return cd
 
@@ -328,7 +331,7 @@ def regraTS(regra, regras, field, col, bookI, esifO, errLoc, cale):
     esifO = esifO + '-' if esifO else ''
     cd  = '{:11}MOVE ?? TO CALEWAAC-FMT-ARGMTO.\n'.format('')
     cd += '{:11}MOVE {}-{}{} TO CALEWAAC-VLR-ARGMTO\n'.format('', bookI, esifO, field.replace('_','-'))
-    cd += '{:11}PERFORM 2800-CHAMAR-CALE1000.\n'.format('')
+    cd += '{:11}PERFORM 2800-CHAMAR-CALE1000.\n\n'.format('')
     cale.TrueCale()
     return cd
 

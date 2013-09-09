@@ -62,7 +62,20 @@
   <!--[if IE 9 ]>    <body class="ie9"> <![endif]-->
   <!--[if (gt IE 9)|!(IE)]><!--> <body> <!--<![endif]-->
 	  <script type="text/javascript">
+        var setScroll = function(expires, path, domain, secure) {
+                                 cookieValue = $('div.scroller').scrollTop();
+                                 document.cookie = 'scrtop='+cookieValue+'; path=/';
+                        };
+        var getScroll = function() {
+		                         var re=new RegExp('scrtop=[^;]+','i');
+	 	                         if (document.cookie.match(re)){
+                                     cookieValue = document.cookie.match(re)[0].split('=')[1];
+		                             return cookieValue;
+		                         };
+		                         return 0;
+                        }; 
 	    jQuery(document).ready(function(){
+            jQuery("div.scroller").scrollTop(getScroll());
 	        jQuery('input.chk_all').attr('onClick',
 	            "if(this.checked) {" +
 	                "jQuery('input.chk_id').each(function(){" +

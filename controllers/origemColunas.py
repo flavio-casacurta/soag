@@ -21,11 +21,17 @@ def index():
                 else False,
                 hidden=dict(codigoAplicacao=idaplicacao))
         if  request.vars:
+            if  str(request.vars.codigoColuna).strip() == '0':
+                session.flash = 'Coluna deve ser preenchida'
+                redirect(URL('index'))
             form.vars.codigoRegra    = request.vars.codigoRegra
+            form.vars.codigoColuna   = request.vars.codigoColuna
         form.vars.usuarioConfirmacao = auth.user.id
         form.vars.dataConfirmacao    = request.vars.dataConfirmacao = \
                                        datetime.datetime.today()
         if  form.accepts(request.vars, session):
+            db(db.checkListPrototipo.codigoAplicacao==idaplicacao).update( model = False
+                                                                         , controllers = False)
             if  request.vars.has_key('delete_this_record') and \
                 request.vars.delete_this_record == 'on':
                 session.flash = 'Origem Coluna Excluida'
@@ -74,7 +80,7 @@ def index():
                         auth.has_membership(2, auth.user.id, \
                         'Super-Usuario')) \
                     else False,
-                buttonSubmit=True))
+                buttonSubmit=True if idaplicacao else False))
 
 @auth.requires_login()
 def orderby():
@@ -114,3 +120,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

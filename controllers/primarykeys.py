@@ -69,6 +69,8 @@ def index():
                         table='entidades',
                         fields=['id','nomeFisico'],
                         masks=[[],['nomeExterno','nomeFisico']],
+                        filtro=db['entidades'].codigoAplicacao==idaplicacao,
+                        orderby='nomeExterno',
                         value=session.entidade_id or 0))],
                 'primaryKeys', primaryKeys,
                 query,
@@ -91,7 +93,7 @@ def index():
                         auth.has_membership(2, auth.user.id, \
                         'Super-Usuario')) \
                     else False,
-                buttonSubmit=True))
+                buttonSubmit=True if idaplicacao and identidade else False))
 
 @auth.requires_login()
 def orderby():
@@ -133,3 +135,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

@@ -7,7 +7,6 @@
 '''
 import win32, time
 from utilities import *
-ra = remover_acentos
 
 dic = {'SACL':'IMAG'
       ,'Serviço de Apoio ao Cliente':'Sistema Imaginario'
@@ -363,10 +362,17 @@ class Erwin():
                 if  ident and 'Dependent_Objects_Ref' in coluna and \
                                       coluna['Dependent_Objects_Ref'] == ident:
                     attrs['nomeLogico'] = coluna['User_Formatted_Name']
-                    try:
+
+                    if  ('Physical_Name' in coluna.keys() and
+                         coluna['Physical_Name'].upper() != '%DOMAINNAME'):
                         attrs['nomeFisico'] = coluna['Physical_Name']
-                    except:
+                    else:
                         attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
+
+#                    try:
+#                        attrs['nomeFisico'] = coluna['Physical_Name']
+#                    except:
+#                        attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
 
                     if  self.__existe__(self._entidadeColunas[nomefis], attrs['nomeFisico']):
                         continue
@@ -385,10 +391,18 @@ class Erwin():
                 elif child and 'Parent_Relationship_Ref' in coluna and \
                                     coluna['Parent_Relationship_Ref'] == child:
                     attrs['nomeLogico'] = coluna['User_Formatted_Name']
-                    try:
+
+                    if  ('Physical_Name' in coluna.keys() and
+                         coluna['Physical_Name'].upper() != '%DOMAINNAME'):
                         attrs['nomeFisico'] = coluna['Physical_Name']
-                    except:
+                    else:
                         attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
+
+#                    try:
+#                        attrs['nomeFisico'] = coluna['Physical_Name']
+#                    except:
+#                        attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
+
                     if  self.__existe__(self._entidadeColunas[nomefis], attrs['nomeFisico']):
                         continue
                     attrs['dataType'] = coluna['Physical_Data_Type']
@@ -405,10 +419,18 @@ class Erwin():
 
                 elif order and 'Long_Id' in coluna and coluna['Long_Id'] == order:
                     attrs['nomeLogico'] = coluna['User_Formatted_Name']
-                    try:
+
+                    if  ('Physical_Name' in coluna.keys() and
+                         coluna['Physical_Name'].upper() != '%DOMAINNAME'):
                         attrs['nomeFisico'] = coluna['Physical_Name']
-                    except:
+                    else:
                         attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
+
+#                    try:
+#                        attrs['nomeFisico'] = coluna['Physical_Name']
+#                    except:
+#                        attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
+
                     if  self.__existe__(self._entidadeColunas[nomefis], attrs['nomeFisico']):
                         continue
                     attrs['dataType'] = coluna['Physical_Data_Type']
@@ -433,10 +455,17 @@ class Erwin():
                                    coluna['Parent_Relationship_Ref'] == parent:
 
                     attrs['nomeLogico'] = coluna['User_Formatted_Name']
-                    try:
+
+                    if  ('Physical_Name' in coluna.keys() and
+                         coluna['Physical_Name'].upper() != '%DOMAINNAME'):
                         attrs['nomeFisico'] = coluna['Physical_Name']
-                    except:
+                    else:
                         attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
+
+#                    try:
+#                        attrs['nomeFisico'] = coluna['Physical_Name']
+#                    except:
+#                        attrs['nomeFisico'] = coluna['User_Formatted_Physical_Name']
 
                     if  self.__existe__(self._entidadeColunas[nomefis], attrs['nomeFisico']):
                         continue
@@ -662,6 +691,8 @@ class Erwin():
                 if   owner[2].startswith('XPK') and len(chaves) > 1:
                     continue
                 ent = self.getEntidades(owner[1])
+                if  not  ent:
+                    continue
                 ret.append([chave['Physical_Name'], ent['Physical_Name']])
 
         return ret

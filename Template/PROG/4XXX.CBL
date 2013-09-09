@@ -55,7 +55,7 @@
        77  FILLER                      PIC  X(050)         VALUE
            '* INICIO DA AREA DE WORKING *'.
       *----------------------------------------------------------------*
-       77  WRK-INVOKINGPROG            PIC  X(008) VALUES SPACES.
+       77  WRK-INVOKINGPROG            PIC  X(008) VALUE SPACES.
        77  WRK-PROGRAM                 PIC  X(008) VALUE '@APPLID4@SIGLAPGM@PERSISTENCIA'.
        77  WRK-TABELA                  PIC  X(018) VALUE
                                                    '@TABLENAME'.

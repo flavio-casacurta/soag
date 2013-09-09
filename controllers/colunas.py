@@ -14,15 +14,19 @@ def index():
     if  session.aplicacao_id <> idaplicacao:
         session.aplicacao_id = idaplicacao
         redirect(URL('index'))
-    form = SQLFORM(colunas, idcoluna, deletable=True \
-            if (auth.user) and (auth.has_membership(1, auth.user.id, \
-                                'Administrador')) \
-            else False,
-                hidden=dict(codigoAplicacao=idaplicacao))
+    form = SQLFORM(colunas, idcoluna, deletable=True
+            if (auth.user) and (auth.has_membership(1, auth.user.id, 'Administrador'))
+            else False, hidden=dict(codigoAplicacao=idaplicacao))
     form.vars.usuarioConfirmacao = auth.user.id
     form.vars.codigoDatatype     = request.vars.codigoDatatype
+    if  (auth.user) and (auth.has_membership(1, auth.user.id, 'Administrador')):
+        colunas.lookups = {'usuarioConfirmacao': ['auth_user', ['first_name','last_name']]}
+    else:
+        colunas.lookups = {'usuarioConfirmacao': ['auth_user', ['first_name','last_name']],
+                           'codigoDatatype': ['datatypes', ['descricao']]}
     form.vars.dataConfirmacao    = datetime.datetime.today()
     if  form.accepts(request.vars, session):
+        db(db.checkListPrototipo.codigoAplicacao==idaplicacao).update(model = False)
         if  request.vars.has_key('delete_this_record') and \
             request.vars.delete_this_record == 'on':
             session.flash = 'Coluna Excluida'
@@ -57,11 +61,11 @@ def index():
                                   'colunas', colunas,
                                   query,
                                   form, fields=['id','columnName',\
-                                                'attributeName','descricao'],
+                                                'attributeName','label'],
                                   noDetail=['codigoAplicacao'],
-                                  scroll=['5%','15%','30%','50%'],
+                                  scroll=['5%','15%','40%','40%'],
                                   search=['columnName','attributeName',\
-                                          'descricao'],
+                                          'label'],
                                   optionDelete=True if (auth.user) and \
                                                        (auth.has_membership(1,\
                                                         auth.user.id, \
@@ -78,7 +82,7 @@ def index():
                                                        auth.user.id, \
                                                        'Super-Usuario')) \
                                                    else False,
-                                  buttonSubmit=True))
+                                  buttonSubmit=True if idaplicacao else False))
 
 @auth.requires_login()
 def orderby():
@@ -118,3 +122,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

@@ -3,7 +3,7 @@
    Created on 07/09/2011
    @author: C&C - HardSoft
 '''
-import os, pdb
+import os
 from Aplicacao                     import Aplicacao
 from Empresa                       import Empresa
 from Entidades                     import Entidades
@@ -18,7 +18,7 @@ from OrigemColunasAplicacao        import OrigemColunasAplicacao
 from RegrasColunas                 import RegrasColunas
 from GerBook                       import GerBook
 from GerProg                       import GerProg
-from Compact                       import Compact
+from CompactPy                     import Compact
 from Gerutl                        import *
 
 class Gerserv(object):
@@ -29,7 +29,7 @@ class Gerserv(object):
         self.cAppl = cAppl or 0
         self.aplicacao = Aplicacao(self.db, self.cAppl)
         self.applId = self.aplicacao.getApplId().upper()
-        self.applName = self.aplicacao.getApplName().upper()
+        self.applName = ra(self.aplicacao.getApplName()).upper()
         self.contratante = self.aplicacao.getContratante().upper()
         self.analista = self.aplicacao.getAnalista().upper()
         self.ownerDb2 = self.aplicacao.getOwnerDb2().upper()
@@ -126,6 +126,7 @@ class Gerserv(object):
             properties['TYPEPGM']=typePgm[i]
             properties['PERSISTENCIA']=persistencia[i]
             properties['USERNAME']=self.userName
+            properties['LOG']=self.log
             retMessage = self.montaMensagem(entidadeId, 'E', 'S', typePgm[i])
             if  not retMessage[0]:
                 return retMessage
@@ -146,25 +147,26 @@ class Gerserv(object):
 
             gerados += 1
 
-#           pdb.set_trace()
-
             retGerarColunas = self.gerarColunas(colunasEntidade
                                                ,entidadeId
                                                ,typePgm[i])
             if  not retGerarColunas[0]:
                 return [0, 'Ocorreu algum erro >>> ' + retGerarColunas[1] + ' <<< na geracao das colunas']
+
             if  self.gerar:
                 self.gerBook.gerBook(properties, retGerarColunas[1])
                 self.gerProg.gerProg(properties, retGerarColunas[1])
             else:
                 self.ret.append([properties , retGerarColunas[1]])
 
-#        cpy = os.path.join( path, 'GERADOS', 'CPY')
-#        pgm = os.path.join( path, 'GERADOS', 'PGM')
-#        self.compact.compact(entidade.nomeExterno, [cpy, pgm])
-#        print 'Expecificacoes Geradas = ' + str(gerados)
-#        return [1, 'Expecificacoes Geradas = ' + str(gerados)]
-        return [1, self.ret]
+        if  self.gerar:
+            cpy = os.path.join( path, 'GERADOS', 'CPY')
+            pgm = os.path.join( path, 'GERADOS', 'PGM')
+            self.compact.compact(entidade.nomeExterno, [cpy, pgm])
+            print 'Servicos Gerados = ' + str(gerados)
+            return [1, 'Servicos Gerados = ' + str(gerados)]
+        else:
+            return [1, self.ret]
 
 
     def gerarColunas(self, colunasEntidade, entidadeId, typePgm):
@@ -610,7 +612,10 @@ class Gerserv(object):
             entidadeIdRef = dicForeignKeys[col.colunas.id][0]
             retPrograma = self.programas.selectProgramasByEntidadeRegra(entidadeIdRef, 'C')
             if  not retPrograma[0]:
-                return [0,'Ocorreu um erro na chamada de selectProgramasByEntidadeRegra.' + str(retPrograma[2])]
+                if  retPrograma[1]:
+                    return [0,'Ocorreu um erro na chamada de selectProgramasByEntidadeRegra.' + str(retPrograma[2])]
+                else:
+                    return [1]
             pgmConsulta = retPrograma[1][0]
             if  pgmConsulta.codigoAplicacao == self.cAppl:
                 soag = self.soag
@@ -683,7 +688,10 @@ class Gerserv(object):
         entidadeIdRef = col.colunasEntidadesReferenciadas.entidadeReferenciada
         retPrograma = self.programas.selectProgramasByEntidadeRegra(entidadeIdRef, 'C')
         if  not retPrograma[0]:
-            return [0,'Ocorreu um erro na chamada de selectProgramasByEntidadeRegra.' + str(retPrograma[2])]
+            if  retPrograma[1]:
+                return [0,'Ocorreu um erro na chamada de selectProgramasByEntidadeRegra.' + str(retPrograma[2])]
+            else:
+                return [1]
         pgmConsulta = retPrograma[1][0]
         if  pgmConsulta.codigoAplicacao == self.cAppl:
             soag = self.soag

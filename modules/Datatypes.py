@@ -28,3 +28,5 @@ class Datatypes:
        except:
            return [0, 'Ocorreu um erro no Select da Tabela Datatypes.', sys.exc_info()[1]]
        return lisDatatypes
+
+# vim: ft=python

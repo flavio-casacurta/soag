@@ -14,9 +14,10 @@ import string
 import traceback
 import base64
 import uuid
-import shutil
 from fileutils import up, w2p_unpack, read_file, write_file
+import shutil
 from HOFsGenericas import *
+import cPickle as pickle
 import zipfile
 try:
     import zlib
@@ -34,88 +35,61 @@ def change(dic, obj):
                 obj[n] = i.replace(k, v)
                 i = obj[n]
     else:
-        if isinstance(obj, str):
+        if isinstance(obj, (str, unicode)):
             for k, v in dic.items():
                 obj = obj.replace(k, v)
     return obj
 
-dra = {'\xc3\x80':'À', '\xc3\x81':'Á', '\xc3\x82':'Â', '\xc3\x83':'Ã',
-       '\xc3\x84':'Ä', '\xc3\x85':'Å', '\xc3\x86':'Æ', '\xc3\x87':'Ç',
-       '\xc3\x88':'È', '\xc3\x89':'É', '\xc3\x8a':'Ê', '\xc3\x8b':'Ë',
-       '\xc3\x8c':'Ì', '\xc3\x8d':'Í', '\xc3\x8e':'Î', '\xc3\x8f':'Ï',
-       '\xc3\x90':'Ð', '\xc3\x91':'Ñ', '\xc3\x92':'Ò', '\xc3\x93':'Ó',
-       '\xc3\x94':'Ô', '\xc3\x95':'Õ', '\xc3\x96':'Ö', '\xc3\x98':'Ø',
-       '\xc3\x99':'Ù', '\xc3\x9a':'Ú', '\xc3\x9b':'Û', '\xc3\x9c':'Ü',
-       '\xc3\x9d':'Ý', '\xc3\x9e':'Þ', '\xc3\x9f':'ß', '\xc3\xa0':'à',
-       '\xc3\xa1':'á', '\xc3\xa2':'â', '\xc3\xa3':'ã', '\xc3\xa4':'ä',
-       '\xc3\xa5':'å', '\xc3\xa6':'æ', '\xc3\xa7':'ç', '\xc3\xa8':'è',
-       '\xc3\xa9':'é', '\xc3\xaa':'ê', '\xc3\xab':'ë', '\xc3\xac':'ì',
-       '\xc3\xad':'í', '\xc3\xae':'î', '\xc3\xaf':'ï', '\xc3\xb0':'ð',
-       '\xc3\xb1':'ñ', '\xc3\xb2':'ò', '\xc3\xb3':'ó', '\xc3\xb4':'ô',
-       '\xc3\xb5':'õ', '\xc3\xb6':'ö', '\xc3\xb8':'ø', '\xc3\xb9':'ù',
-       '\xc3\xba':'ú', '\xc3\xbb':'û', '\xc3\xbc':'ü', '\xc3\xbd':'ý',
-       '\xc3\xbe':'þ', '\xc3\xbf':'ÿ'}
+#dicUTF8 = {'\xc3\x80':'À', '\xc3\x81':'Á', '\xc3\x82':'Â', '\xc3\x83':'Ã',
+#          '\xc3\x84':'Ä', '\xc3\x85':'Å', '\xc3\x86':'Æ', '\xc3\x87':'Ç',
+#          '\xc3\x88':'È', '\xc3\x89':'É', '\xc3\x8a':'Ê', '\xc3\x8b':'Ë',
+#          '\xc3\x8c':'Ì', '\xc3\x8d':'Í', '\xc3\x8e':'Î', '\xc3\x8f':'Ï',
+#          '\xc3\x90':'Ð', '\xc3\x91':'Ñ', '\xc3\x92':'Ò', '\xc3\x93':'Ó',
+#          '\xc3\x94':'Ô', '\xc3\x95':'Õ', '\xc3\x96':'Ö', '\xc3\x98':'Ø',
+#          '\xc3\x99':'Ù', '\xc3\x9a':'Ú', '\xc3\x9b':'Û', '\xc3\x9c':'Ü',
+#          '\xc3\x9d':'Ý', '\xc3\x9e':'Þ', '\xc3\x9f':'ß', '\xc3\xa0':'à',
+#          '\xc3\xa1':'á', '\xc3\xa2':'â', '\xc3\xa3':'ã', '\xc3\xa4':'ä',
+#          '\xc3\xa5':'å', '\xc3\xa6':'æ', '\xc3\xa7':'ç', '\xc3\xa8':'è',
+#          '\xc3\xa9':'é', '\xc3\xaa':'ê', '\xc3\xab':'ë', '\xc3\xac':'ì',
+#          '\xc3\xad':'í', '\xc3\xae':'î', '\xc3\xaf':'ï', '\xc3\xb0':'ð',
+#          '\xc3\xb1':'ñ', '\xc3\xb2':'ò', '\xc3\xb3':'ó', '\xc3\xb4':'ô',
+#          '\xc3\xb5':'õ', '\xc3\xb6':'ö', '\xc3\xb8':'ø', '\xc3\xb9':'ù',
+#          '\xc3\xba':'ú', '\xc3\xbb':'û', '\xc3\xbc':'ü', '\xc3\xbd':'ý',
+#          '\xc3\xbe':'þ', '\xc3\xbf':'ÿ'}
 
-def nUni2Uni(txt):
-    return change(dra, txt)
+dicUTF8 = {'\xc3\x80': u'\xc0', '\xc3\x81': u'\xc1', '\xc3\x82': u'\xc2', '\xc3\x83': u'\xc3'
+          ,'\xc3\x84': u'\xc4', '\xc3\x85': u'\xc5', '\xc3\x86': u'\xc6', '\xc3\x87': u'\xc7'
+          ,'\xc3\x88': u'\xc8', '\xc3\x89': u'\xc9', '\xc3\x8a': u'\xca', '\xc3\x8b': u'\xcb'
+          ,'\xc3\x8c': u'\xcc', '\xc3\x8d': u'\xcd', '\xc3\x8e': u'\xce', '\xc3\x8f': u'\xcf'
+          ,'\xc3\x90': u'\xd0', '\xc3\x91': u'\xd1', '\xc3\x92': u'\xd2', '\xc3\x93': u'\xd3'
+          ,'\xc3\x94': u'\xd4', '\xc3\x95': u'\xd5', '\xc3\x96': u'\xd6', '\xc3\x98': u'\xd8'
+          ,'\xc3\x99': u'\xd9', '\xc3\x9a': u'\xda', '\xc3\x9b': u'\xdb', '\xc3\x9c': u'\xdc'
+          ,'\xc3\x9d': u'\xdd', '\xc3\x9e': u'\xde', '\xc3\x9f': u'\xdf', '\xc3\xa0': u'\xe0'
+          ,'\xc3\xa1': u'\xe1', '\xc3\xa2': u'\xe2', '\xc3\xa3': u'\xe3', '\xc3\xa4': u'\xe4'
+          ,'\xc3\xa5': u'\xe5', '\xc3\xa6': u'\xe6', '\xc3\xa7': u'\xe7', '\xc3\xa8': u'\xe8'
+          ,'\xc3\xa9': u'\xe9', '\xc3\xaa': u'\xea', '\xc3\xab': u'\xeb', '\xc3\xac': u'\xec'
+          ,'\xc3\xad': u'\xed', '\xc3\xae': u'\xee', '\xc3\xaf': u'\xef', '\xc3\xb0': u'\xf0'
+          ,'\xc3\xb1': u'\xf1', '\xc3\xb2': u'\xf2', '\xc3\xb3': u'\xf3', '\xc3\xb4': u'\xf4'
+          ,'\xc3\xb5': u'\xf5', '\xc3\xb6': u'\xf6', '\xc3\xb8': u'\xf8', '\xc3\xb9': u'\xf9'
+          ,'\xc3\xba': u'\xfa', '\xc3\xbb': u'\xfb', '\xc3\xbc': u'\xfc', '\xc3\xbd': u'\xfd'
+          ,'\xc3\xbe': u'\xfe', '\xc3\xbf': u'\xff'}
 
-#def remover_acentos(txt, codif='latin-1'):
 def remover_acentos(txt, codif='cp1252'):
-
-    for k in dra.keys():
+    for k in dicUTF8.keys():
         if  k in txt:
             codif='utf-8'
             break
-
     return unicodedata.normalize('NFKD', txt.decode(codif)).encode('ASCII', 'ignore')
+ra = remover_acentos
 
-def safe_str(obj):
-    try:
-        obj = str(obj)
-    except UnicodeEncodeError:
-        # obj is unicode
-        try:
-            obj = unicode(obj).encode('unicode_escape', 'ignore')
-            for x in obj:
-                if  ord(x) > 255:
-                    obj.replace(x, ' ')
-        except:
-            return ''
-    dic = {'\\xc7':'A', '\\xb5':'A', '\\xb7':'A',  '\\x84':'A',
-           '\\x90':'E', '\\xd4':'E', '\\xd3':'E',
-           '\\xd6':'I', '\\xde':'I', '\\xd8':'I',
-           '\\xe5':'O', '\\xe0':'O', '\\x99':'O',
-           '\\xe9':'U', '\\xeb':'U', '\\x9a':'U',
-           '\\xc6':'a', '\\xa0':'a', '\\x85':'a',  '\\x84':'a',
-           '\\xe3':'a', '\\xe1':'a',
-           '\\x82':'e', '\\x8a':'e', '\\x89':'e',  '\\xea':'e',
-           '\\xe4':'o', '\\xa2':'o', '\\x95':'o',  '\\x94':'o',
-           '\\xf3':'o', '\\xf4':'o', '\\xf5':'o',
-           '\\xa3':'u', '\\x97':'u', '\\x81':'u',  '\\xfa':'u',
-           '\\x87':'c', '\\xe7':'c', '\\r'  :'\r', '\\n'  :'\n'}
-    for k, v in dic.items():
-        try:
-            obj = obj.replace(k, v)
-        except:
-            break
-    return obj
+def pic(obj,file):
+    f = open(file, 'wb')
+    pickle.dump(obj, f)
+    f.close
 
-def safe_string(obj):
-
-    try:
-        obj = str(obj)
-    except:
-        # obj is unicode
-        try:
-            obj = '%s'.decode('cp1252', 'ignore').\
-                                               encode('cp1252', 'ignore') % obj
-            for x in obj:
-                if  ord(x) > 128:
-                    obj.replace(x, ' ')
-        except:
-            obj = ''
-
-    return obj
+def unPic(file):
+    f = open(file, 'rb')
+    return pickle.load(f)
 
 def iterInv(data):
     for index in range(len(data)-1, -1, -1):
@@ -142,27 +116,6 @@ def insAster72(txt):
                  l+=(' '*(71-len(l))+'*')
          ts+=l+'\n'
     return ts
-
-def Capitalize(string, N=2):
-
-    if  not string:
-        return ''
-
-    words  = string.split()
-    result = words[0].capitalize() if words else ''
-
-    if  words: del(words[0])
-
-    for word in words:
-        if len(word) > N:
-            if word[1] == "'":
-                result += ' ' + word[:2].lower() + word[2:].capitalize()
-            else:
-                result += ' ' + word.capitalize()
-        else:
-            result += ' ' + word
-
-    return result
 
 def Select(db, name=None, table=None, fields=[], prefix=None, \
                todos='', lookups={}, masks=[], filtro='',     \
@@ -974,102 +927,7 @@ def lreclCopy(copy):
 
     return {'retorno': True, 'msg': msg, 'lrecl': length}
 
-def apath(path='', r=None):
-    """
-    Builds a path inside an application folder
-
-    Parameters
-    ----------
-    path:
-        path within the application folder
-    r:
-        the global request object
-
-    """
-
-    opath = up(r.folder)
-    while path[:3] == '../':
-        (opath, path) = (up(opath), path[3:])
-    return os.path.join(opath, path).replace('\\', '/')
-
-def app_create(db, app, request, force=False, key=None, info=False):
-    """
-    Create a copy of welcome.w2p (scaffolding) app
-
-    Parameters
-    ----------
-    app:
-        application name
-    request:
-        the global request object
-
-    """
-    path = apath(app, request)
-    if not os.path.exists(path):
-        try:
-            os.mkdir(path)
-        except:
-            if info:
-                return False, traceback.format_exc(sys.exc_info)
-            else:
-                return False
-    elif not force:
-        if info:
-            return False, "Application exists"
-        else:
-            return False
-    try:
-        w2p_unpack('welcome.w2p', path)
-        for subfolder in [
-            'models', 'views', 'controllers', 'databases',
-            'modules', 'cron', 'errors', 'sessions', 'cache',
-            'languages', 'static', 'private', 'uploads']:
-            subpath = os.path.join(path, subfolder)
-            if not os.path.exists(subpath):
-                os.mkdir(subpath)
-        dbt = os.path.join(path, 'models', 'db.py')
-        if os.path.exists(dbt):
-            data = read_file(dbt)
-            data = data.replace('<your secret key>',
-                                'sha512:' + (key or web2py_uuid()))
-            write_file(dbt, data)
-
-        parms = db(db.parametros.id==1).select()[0]
-
-        template = os.path.join('\\\\'
-                              , '127.0.0.1'
-                              , 'c$'
-                              , parms.web2py
-                              , 'applications'
-                              , parms.soag
-                              , 'Template'
-                              , 'web2py') + os.sep
-
-        models = os.path.join('\\\\'
-                            , '127.0.0.1'
-                            , 'c$'
-                            , parms.web2py
-                            , 'applications'
-                            , app
-                            , 'models') + os.sep
-
-        shutil.copyfile(template + 'addgets.py', models + 'addgets.py')
-
-        shutil.copyfile(template + 'forms.py', models + 'forms.py')
-
-        shutil.copyfile(template + 'listdetail.py', models + 'listdetail.py')
-
-        shutil.copyfile(template + 'menu1.py', models + 'menu.py')
-
-        shutil.copyfile(template + 'menu2.py', models + 'menu2.py')
-
-        if info:
-            return True, None
-        else:
-            return True
-    except:
-        shutil.rmtree(path)
-        if info:
-            return False, traceback.format_exc(sys.exc_info)
-        else:
-            return False
+def numAuto(db, campo, where):
+    query =  db(where).select(campo.max())
+    qmx   = query[0]._extra[eval("'MAX({})'".format(str(campo)))]
+    return qmx + 1 if qmx else 1

@@ -30,6 +30,7 @@ def index():
         form.vars.usuarioConfirmacao = auth.user.id
         form.vars.dataConfirmacao    = datetime.datetime.today()
         if  form.accepts(request.vars, session):
+            db(db.checkListPrototipo.codigoAplicacao==idaplicacao).update(model = False)
             if  request.vars.has_key('delete_this_record') and \
                 request.vars.delete_this_record == 'on':
                 session.flash = 'Coluna Entidade Excluida'
@@ -68,6 +69,7 @@ def index():
                                        masks=[[],['nomeExterno','nomeFisico']],
                                        filtro=db['entidades'].codigoAplicacao\
                                                    ==idaplicacao,
+                                       orderby='nomeExterno',
                                        value=session.entidade_id)),
                                   'Tamanho: %s bytes' % str(\
                                     jobs.lrecl(db, session.entidade_id))],
@@ -117,7 +119,7 @@ def index():
                                              auth.has_membership(2, \
                                              auth.user.id, 'Super-Usuario')) \
                                         else False,
-                                  buttonSubmit=True))
+                                  buttonSubmit=True if idaplicacao and identidade else False))
 
 @auth.requires_login()
 def orderby():
@@ -156,3 +158,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

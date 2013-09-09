@@ -8,7 +8,8 @@ def index():
     iderwin    = session.get('iderwin', 0)
     form       = SQLFORM(db.erwinents, iderwinent, deletable=False)
     if  form.accepts(request.vars, session):
-        session.flash = 'Entidade Alterada'
+        session.flash = 'Dclgen Alterada'
+        db(db.erwinents.id==iderwinent).update(obs='')
         redirect(URL('index', args=(iderwinent)))
     if  session.flash:
         response.flash = session.flash
@@ -29,11 +30,12 @@ def index():
                                   form, fields=['id',
                                                 'entidade',
                                                 'nomeExterno1',
-                                                'nomeExterno2'],
-                                  scroll=['5%','37%','29%','29%'],
+                                                'nomeExterno2',
+                                                'obs'],
+                                  scroll=['5%','20%','20%','20%', '35%'],
                                   width_label='35%',
                                   width_field='65%',
-                                  noDetail=['erwin'],
+                                  noDetail=['erwin', 'obs'],
                                   orderBy=['nomeExterno2', 'ASC'],
                                   search=['entidade',
                                           'nomeExterno1',
@@ -79,3 +81,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

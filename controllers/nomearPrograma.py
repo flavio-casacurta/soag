@@ -22,6 +22,7 @@ def index():
     form = SQLFORM(programas, idprograma, deletable=True)
     if  request.vars:
         form.vars.codigoRegra    = int(request.vars.codigoRegra or 0)
+        form.vars.codigoTipo     = int(request.vars.codigoTipo  or 0)
         form.vars.nomePrograma   = request.vars.nomePrograma    or ''
         form.vars.bookInterface  = request.vars.bookInterface   or ''
         form.vars.bookControle   = request.vars.bookControle    or ''
@@ -61,15 +62,17 @@ def index():
                     session.flash = \
                         'Regra deve estar de acordo com o declarado na entidade'
         if  not session.flash and not idprograma:
-            programa=db(db[programas].nomePrograma==request.vars.nomePrograma).\
-                        select()
+            programa=db((db[programas].codigoAplicacao==session.aplicacao_id)
+                       &(db[programas].codigoEntidade==request.vars.codigoEntidade)
+                       &(db[programas].codigoRegra==request.vars.codigoRegra)).select()
             if  programa:
-                session.flash = 'Ja existe um programa com este nome'
-    bookSaida = {'1':False, '2':False, '3':False, '4':True, '5':True}
+                session.labelErrors = 'Função:'
+                session.msgsErrors = {1:'Ja existe um programa para esta Função'}
+    bookSaida = {'0':False, '1':False, '2':False, '3':False, '4':True, '5':True}
     if  request.vars.codigoRegra:
         form.vars.bookSaida = request.vars.bookSaida = \
                                     bookSaida[request.vars.codigoRegra]
-    if  not session.flash:
+    if  not session.flash and not session.msgsErrors:
         if  form.accepts(request.vars, session):
             if  ('delete_this_record' in request.vars) and \
                         request.vars.delete_this_record == 'on':
@@ -84,6 +87,13 @@ def index():
     if  session.flash:
         response.flash = session.flash
         session.flash  = None
+    if  session.labelErrors:
+        form.labelErrors    = session.labelErrors
+        session.labelErrors = None
+    if  session.msgsErrors:
+        form.errors         = session.msgsErrors
+        session.msgsErrors  = None
+
     if  not idaplicacao or not identidade:
         query = db[programas].codigoAplicacao==0
     else:
@@ -107,6 +117,7 @@ def index():
                             fields=['id','nomeFisico'],
                             masks=[[],['nomeExterno','nomeFisico']],
                             filtro=db['entidades'].codigoAplicacao==idaplicacao,
+                            orderby='nomeExterno',
                             value=session.entidade_id or 0))],
                     'programas', programas,
                     query,
@@ -117,7 +128,7 @@ def index():
                     search=['codigoRegra', 'nomePrograma'],
                     optionDelete=True,
                     buttonClear=True,
-                    buttonSubmit=True))
+                    buttonSubmit=True if idaplicacao and identidade else False))
 
 @auth.requires_login()
 def orderby():
@@ -156,3 +167,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python

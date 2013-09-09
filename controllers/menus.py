@@ -7,9 +7,9 @@ import utilities as utl
 def index():
     idmenu = request.args(0)
     if  request.vars:
-        idaplicacao            = int(request.vars.codigoAplicacao or 0)
+        idaplicacao = int(request.vars.codigoAplicacao or 0)
     else:
-        idaplicacao            = int(session.aplicacao_id         or 0)
+        idaplicacao = int(session.aplicacao_id         or 0)
     if  session.aplicacao_id  <> idaplicacao:
         session.aplicacao_id   = idaplicacao
         redirect(URL('index'))
@@ -21,6 +21,7 @@ def index():
     if  form.vars.url is None:
         form.vars.url = request.vars.url
     if  form.accepts(request.vars, session):
+        db(db.checkListPrototipo.codigoAplicacao==idaplicacao).update(menus = False, controllers = False)
         if  ('delete_this_record' in request.vars) and \
             request.vars.delete_this_record == 'on':
             session.flash = 'Menu Excluido'
@@ -30,7 +31,8 @@ def index():
                 session.flash  = 'Menu Alterado'
                 redirect(URL('index', args=(idmenu)))
             else:
-                response.flash = 'Menu Incluído'
+                session.flash = 'Menu Incluído'
+                redirect(URL('index'))
     if  session.flash:
         response.flash = session.flash
         session.flash  = None
@@ -67,7 +69,7 @@ def index():
                       search=['parent', 'descricao', 'url'],
                       optionDelete=True,
                       buttonClear=True,
-                      buttonSubmit=True,
+                      buttonSubmit=True if idaplicacao else False,
                       buttons=buttons,
                       popups=popups))
 

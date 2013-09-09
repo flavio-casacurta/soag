@@ -71,7 +71,7 @@ def index():
                     noList=True,
                     optionDelete=False,
                     buttonClear=False,
-                    buttonSubmit=True,
+                    buttonSubmit=True if idaplicacao else False,
                     buttons=buttons,
                     popups=popups))
 
@@ -120,3 +120,5 @@ def report():
 @auth.requires_login()
 def download():
     return response.download(request, db)
+
+# vim: ft=python
