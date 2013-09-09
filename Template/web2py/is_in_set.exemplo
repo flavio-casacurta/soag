@@ -1,3 +1,0 @@
-tabela.coluna.requires               = IS_IN_SET([('1','Ativo'),('0','Inativo')]
-                                                               , zero=T('-- Selecione --')
-                                                               , error_message=msgGet(db,'IMAG0603'))
